@@ -21,10 +21,10 @@ namespace Todolist.Controllers
         }
 
         // GET: api/Tasks
-        [HttpGet]
-        public IEnumerable<Task> GetTasks()
+        [HttpGet("byTasklistid")]
+        public IEnumerable<Task> GetTasks([FromQuery] int tasklistid)
         {
-            return _context.Tasks;
+            return _context.Tasks.Where(t => t.Tasklist.Id == tasklistid);
         }
 
         // GET: api/Tasks/5

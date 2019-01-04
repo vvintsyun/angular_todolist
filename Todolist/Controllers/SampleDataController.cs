@@ -16,13 +16,5 @@ namespace Todolist.Controllers
         {
             await HttpContext.ChallengeAsync("Google", new AuthenticationProperties() { RedirectUri = "/signin-google" });
         }
-
-        [HttpGet]
-        [Route("/api/usercheck")]
-        public async Task CheckUser()
-        {
-            var x = User;
-            await HttpContext.ChallengeAsync("Google", new AuthenticationProperties() { RedirectUri = "/signin-google" });
-        }
     }
 }

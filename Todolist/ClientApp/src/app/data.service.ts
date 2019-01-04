@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient} from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Task } from './task';
 import { Tasklist } from './tasklist';
  
@@ -11,8 +11,8 @@ export class TaskDataService {
     constructor(private http: HttpClient) {
     }
  
-    getTasks() {
-        return this.http.get(this.url);
+    getTasks(tasklistid: number) {
+      return this.http.get(this.url + '/byTasklistid', {params: { "tasklistid": tasklistid.toString()} });
     }
  
     createTask(task: Task) {

@@ -10,6 +10,9 @@ import { TasklistDataService } from '../data.service';
 })
 export class NavMenuComponent implements OnInit {
   isExpanded = false;
+  tasklist: Tasklist = new Tasklist();
+  tasklists: Tasklist[];
+  tableMode: boolean = true;
 
   collapse() {
     this.isExpanded = false;
@@ -19,14 +22,11 @@ export class NavMenuComponent implements OnInit {
     this.isExpanded = !this.isExpanded;
   }
 
-  tasklist: Tasklist = new Tasklist();
-  tasklists: Tasklist[];
-  tableMode: boolean = true;
 
   constructor(private dataService: TasklistDataService) { }
 
   ngOnInit() {
-    this.loadTasklists();    // загрузка данных при старте компонента  
+    this.loadTasklists();    // загрузка данных при старте компонента
   }
   // получаем данные через сервис
   loadTasklists() {

@@ -9,7 +9,7 @@ using Todolist.Models;
 
 namespace Todolist.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/tasklists")]
     [ApiController]
     public class TasklistsController : ControllerBase
     {
