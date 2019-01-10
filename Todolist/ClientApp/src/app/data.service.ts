@@ -38,6 +38,10 @@ export class TasklistDataService {
     return this.http.get(this.url);
   }
 
+  getTasklist(id: number) {
+    return this.http.get(this.url + '/' + id);
+  }
+
   createTasklist(tasklist: Tasklist) {
     return this.http.post(this.url, tasklist);
   }

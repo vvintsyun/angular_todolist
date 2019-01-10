@@ -26,14 +26,15 @@ export class NavMenuComponent implements OnInit {
   constructor(private dataService: TasklistDataService) { }
 
   ngOnInit() {
-    this.loadTasklists();    // загрузка данных при старте компонента
+    this.loadTasklists();
   }
-  // получаем данные через сервис
+  
   loadTasklists() {
     this.dataService.getTasklists()
       .subscribe((data: Tasklist[]) => this.tasklists = data);
+    console.log(this.tasklists);
   }
-  // сохранение данных
+  
   save() {
     if (this.tasklist.id == null) {
       this.dataService.createTasklist(this.tasklist)

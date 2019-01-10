@@ -28,12 +28,14 @@
 
   <ItemGroup>
     <None Remove="ClientApp\src\app\data.service.ts" />
+    <None Remove="ClientApp\src\app\login.service.ts" />
     <None Remove="ClientApp\src\app\task.ts" />
     <None Remove="ClientApp\src\app\tasklist.ts" />
   </ItemGroup>
 
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\app\data.service.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\login.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\tasklist.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\task.ts" />
   </ItemGroup>
