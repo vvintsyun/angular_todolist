@@ -31,8 +31,7 @@ export class NavMenuComponent implements OnInit {
   
   loadTasklists() {
     this.dataService.getTasklists()
-      .subscribe((data: Tasklist[]) => this.tasklists = data);
-    console.log(this.tasklists);
+      .subscribe((data: Tasklist[]) => this.tasklists = data);    
   }
   
   save() {
@@ -57,7 +56,7 @@ export class NavMenuComponent implements OnInit {
       .subscribe(data => this.loadTasklists());
   }
   add() {
-    this.cancel();
+    //this.cancel();
     this.tableMode = false;
-  }
+  }  
 }

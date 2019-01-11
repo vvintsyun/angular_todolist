@@ -18,10 +18,31 @@
               </a>
             </li>
             <li *ngFor="let tl of tasklists" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
-              <a [routerLink]='["/tasklist",tl?.id]' (click)='collapse()'>
-                <span class='glyphicon glyphicon-th-list'></span> {{tl?.name}}
-              </a>
-            </li>            
+              <ng-template [ngIf]="tasklist?.id != tl.id" [ngIfElse]="edit">
+                <a [routerLink]='["/tasklist",tl?.id]' [name]="tl?.name" (click)='collapse()'>
+                  <span class='glyphicon glyphicon-th-list'></span> {{tl?.name}}
+                </a>
+                <span class="glyphicon glyphicon-pencil" title="Переименовать" (click)="editTasklist(tl)" ></span>
+                <span class="glyphicon glyphicon-trash" title="Удалить" (click)="delete(tl)" ></span>
+              </ng-template>
+            </li>
+            <li *ngIf="tableMode; else create">
+              <a><span class='glyphicon glyphicon-plus' title="Добавить" (click)='add()'></span></a>
+            </li>
+            <ng-template #create>
+              <li>
+                <input type="text" [(ngModel)]="tasklist.name" class="form-control" />
+                <span title="Сохранить" (click)="save()" class="glyphicon glyphicon-ok"></span>
+                <span title="Отмена" (click)="cancel()" class="glyphicon glyphicon-remove"></span>
+              </li>
+            </ng-template>
+            <ng-template #edit>
+              <li>
+                <input type="text" [(ngModel)]="tasklist.name" class="form-control" />
+                <span title="Сохранить" (click)="save()" class="glyphicon glyphicon-ok"></span>
+                <span title="Отмена" (click)="cancel()" class="glyphicon glyphicon-remove"></span>
+              </li>
+            </ng-template>
           </ul>
         </div>
     </div>

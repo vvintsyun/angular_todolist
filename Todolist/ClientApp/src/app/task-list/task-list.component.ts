@@ -69,21 +69,21 @@ export class TaskListComponent implements OnInit {
     this.cancel();
     this.tableMode = false;
   }
-  rename() {
-    this.showTitle = false;
-  }
-  saveTitle() {
-    if (this.tasklist.name) {
-      this.taskListDataService.updateTasklist(this.tasklist)
-        .subscribe(data => this.loadTasklist(this.tasklistid));
-      //this.menuList.loadTasklists();
-      this.showTitle = true;
-    }
-  }
-  cancelTitle() {
-    this.loadTasklist(this.tasklistid);
-    this.showTitle = true;
-  }
+  //rename() {
+  //  this.showTitle = false;
+  //}
+  //saveTitle() {
+  //  if (this.tasklist.name) {
+  //    this.taskListDataService.updateTasklist(this.tasklist)
+  //      .subscribe(data => this.loadTasklist(this.tasklistid));
+  //    //this.menuList.loadTasklists();
+  //    this.showTitle = true;
+  //  }
+  //}
+  //cancelTitle() {
+  //  this.loadTasklist(this.tasklistid);
+  //  this.showTitle = true;
+  //}
   login() {
     this.loginService.login();
   }
