@@ -1,38 +1,38 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import {Task} from '../task';
 import {TaskDataService, TasklistDataService} from '../data.service';
 import {ActivatedRoute} from '@angular/router';
-import { LoginService } from '../login.service';
+import { LoginService, SecurityService } from '../login.service';
 import { Tasklist } from '../tasklist';
 import { NavMenuComponent } from '../nav-menu/nav-menu.component';
+import { Subscription } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-task-list',
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.css']
 })
-export class TaskListComponent implements OnInit {
+export class TaskListComponent implements OnInit {  
 
   task: Task = new Task();
   tasks: Task[];
   tableMode: boolean = true;
-  showTitle: boolean = true;
   tasklist: Tasklist;
   tasklistid: number;
-  menuList: NavMenuComponent;
-  //tasklistTitle: string;
 
-  constructor(private taskDataService: TaskDataService, private taskListDataService: TasklistDataService, private route: ActivatedRoute, private loginService: LoginService) {
+  constructor(private taskDataService: TaskDataService, private taskListDataService: TasklistDataService, private route: ActivatedRoute, private loginService: SecurityService) {
   }
 
-  ngOnInit() {
+  ngOnInit() {    
     this.route.paramMap.subscribe((params) => {
       this.tasklistid = +params.get('id');
       //console.log('Task list id: ' + this.tasklistid);
       this.loadTasklist(this.tasklistid);
       this.loadTasks(this.tasklistid);
     });
-  }
+    //this.tableMode = this.tasks.length > 0;
+  }    
 
   loadTasklist(tasklistid: number) {
     this.taskListDataService.getTasklist(tasklistid)
@@ -46,6 +46,8 @@ export class TaskListComponent implements OnInit {
   
   save() {
     if (this.task.id == null) {
+      this.task.tasklist = this.tasklist;
+      //this.tasklist.user = this.loginService.getUserId();
       this.taskDataService.createTask(this.task)
         .subscribe((data: Task) => this.tasks.push(data));
     } else {
@@ -68,27 +70,5 @@ export class TaskListComponent implements OnInit {
   add() {
     this.cancel();
     this.tableMode = false;
-  }
-  //rename() {
-  //  this.showTitle = false;
-  //}
-  //saveTitle() {
-  //  if (this.tasklist.name) {
-  //    this.taskListDataService.updateTasklist(this.tasklist)
-  //      .subscribe(data => this.loadTasklist(this.tasklistid));
-  //    //this.menuList.loadTasklists();
-  //    this.showTitle = true;
-  //  }
-  //}
-  //cancelTitle() {
-  //  this.loadTasklist(this.tasklistid);
-  //  this.showTitle = true;
-  //}
-  login() {
-    this.loginService.login();
-  }
-
-  logout() {
-    this.loginService.logout();
-  }
+  }  
 }

@@ -27,6 +27,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\Task.cs" />
+    <Compile Remove="Models\Tasklist.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="ClientApp\src\app\data.service.ts" />
     <None Remove="ClientApp\src\app\login.service.ts" />
     <None Remove="ClientApp\src\app\task.ts" />

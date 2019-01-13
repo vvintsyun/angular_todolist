@@ -10,12 +10,14 @@ import {CommonModule} from '@angular/common';
 import {TaskListComponent} from './task-list/task-list.component';
 //import { Interceptor401Service } from './login.service';
 import { checkIfUserIsAuthenticated, SecurityService } from './login.service';
+import { HomeComponent } from './home/home.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     NavMenuComponent,
     TaskListComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,

@@ -22,7 +22,7 @@ namespace Todolist.Controllers
 
         // GET: api/Tasklists
         [HttpGet]
-        public IEnumerable<Tasklist> GetTasklists()
+        public IEnumerable<Tasklists> GetTasklists()
         {
             return _context.Tasklists;
         }
@@ -48,7 +48,7 @@ namespace Todolist.Controllers
 
         // PUT: api/Tasklists/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTasklist([FromRoute] int id, [FromBody] Tasklist tasklist)
+        public async Task<IActionResult> PutTasklist([FromRoute] int id, [FromBody] Tasklists tasklist)
         {
             if (!ModelState.IsValid)
             {
@@ -83,7 +83,7 @@ namespace Todolist.Controllers
 
         // POST: api/Tasklists
         [HttpPost]
-        public async Task<IActionResult> PostTasklist([FromBody] Tasklist tasklist)
+        public async Task<IActionResult> PostTasklist([FromBody] Tasklists tasklist)
         {
             if (!ModelState.IsValid)
             {

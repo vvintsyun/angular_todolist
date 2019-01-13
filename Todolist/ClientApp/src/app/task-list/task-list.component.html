@@ -4,23 +4,11 @@
       <app-nav-menu></app-nav-menu>
     </div>
     <div class='col-sm-9 body-content'>
-      <!--<input type="button" value="Удалить" class="btn btn-default" (click)="delete()" /><br />-->
-      <!--<input type="button" value="Переименовать" class="btn btn-default" (click)="rename()" /><br />-->
-      <!--<div *ngIf="showTitle; else editTitle">-->
-        <h1>{{tasklist?.name}}</h1>
-        <!--<span class="glyphicon glyphicon-pencil" title="Переименовать" (click)="rename()"></span>
-        <span class="glyphicon glyphicon-trash" title="Удалить" (click)="delete()"></span>
-      </div>-->
-      <!--<ng-template #editTitle>
-        <input type="text" [(ngModel)]="tasklist.name" class="form-control" />  
-        <span title="Сохранить" (click)="saveTitle()" class="glyphicon glyphicon-ok" ></span>
-        <span title="Отмена" (click)="cancelTitle()" class="glyphicon glyphicon-remove" ></span>     
-      </ng-template>-->
-      <!--<span class="glyphicon glyphicon-pencil" title="Переименовать"></span>-->
-      <input type="button" value="Login" class="btn btn-default" (click)="login()"><br />
+      <h1>{{tasklist?.name}}</h1>        
       <input type="button" value="Добавить" class="btn btn-default" (click)="add()" />
       <table *ngIf="tableMode; else create" class="table table-striped">
         <thead>
+          <!--*ngIf="typeof this.tasks !== 'undefined'"-->
           <tr>
             <td>Описание</td>
             <td>Выполнена</td>

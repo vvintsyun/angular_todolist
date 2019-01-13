@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +32,7 @@ namespace Todolist
         public void ConfigureServices(IServiceCollection services)
         {            
             services.AddDbContext<Context>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection").Replace("%CONTENTROOTPATH%", _contentRootPath)));
+            services.AddDbContext<IdentityDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection").Replace("%CONTENTROOTPATH%", _contentRootPath)));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
@@ -40,14 +43,14 @@ namespace Todolist
             });
 
             services.AddIdentity<IdentityUser, IdentityRole>()
-                .AddEntityFrameworkStores<Context>()
+                .AddEntityFrameworkStores<IdentityDbContext>()
                 .AddDefaultTokenProviders();
 
             //services.AddDefaultIdentity<IdentityUser>()
             //    .AddEntityFrameworkStores<Context>()
             //    .AddDefaultTokenProviders();
             //IdentityCookieAuthenticationBuilderExtensions.AddExternalCookie();
-            //services.ConfigureApplicationCookie(options => options.LoginPath = "/Account/LogIn");
+            //services.ConfigureApplicationCookie(options => options.LoginPath = "/Account/LogIn");            
             services.AddAuthentication(options =>
                 {
                     options.DefaultSignOutScheme = IdentityConstants.ApplicationScheme;
@@ -57,25 +60,19 @@ namespace Todolist
                      options.ClientId = Configuration["auth:google:clientid"];
                      options.ClientSecret = Configuration["auth:google:clientsecret"];
                      options.CallbackPath = new Microsoft.AspNetCore.Http.PathString("/signin-google");
-                    //options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "UserId");
-                    options.ClaimActions.MapJsonKey(ClaimTypes.Email, "EmailAddress", ClaimValueTypes.Email);
-                    options.ClaimActions.MapJsonKey(ClaimTypes.Name, "Name");
-                }).AddCookie(options => { options.Cookie.Name = IdentityConstants.ExternalScheme; });
-            //    .AddCookie(options =>
-            //    {
-            //        options.CookieName = "MyCookie",
-            //        options.
-            //    });
-
-            //app.UseCookieAuthentication(new CookieAuthenticationOptions
-            //{
-            //    AuthenticationScheme = "MyCookie",
-            //    AutomaticAuthenticate = true,
-            //    AutomaticChallenge = true,
-            //    LoginPath = new PathString("/account/login")
-            //});
-
+                     options.Events = new OAuthEvents
+                     {
+                         OnRemoteFailure = (RemoteFailureContext context) =>
+                         {
+                            context.Response.Redirect("/");
+                            context.HandleResponse();
+                            return System.Threading.Tasks.Task.CompletedTask;
+                         }
+                     };
+                    //options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "UserId");
+                    //options.ClaimActions.MapJsonKey(ClaimTypes.Email, "EmailAddress", ClaimValueTypes.Email);
+                    //options.ClaimActions.MapJsonKey(ClaimTypes.Name, "Name");
+                });   
 
             services.AddCors(corsOptions =>
             {
@@ -106,16 +103,16 @@ namespace Todolist
             //        name: "default",
             //        template: "{controller}/{action=Index}/{id?}");
             //});
+            app.UseAuthentication();
             app.UseMvcWithDefaultRoute();
             app.UseCors("fully permissive");
-            app.UseAuthentication();
             app.UseSpa(spa =>
             {
                 // To learn more about options for serving an Angular SPA from ASP.NET Core,
                 // see https://go.microsoft.com/fwlink/?linkid=864501
 
                 spa.Options.SourcePath = "ClientApp";
-                
+
                 if (env.IsDevelopment())
                 {
                     spa.UseAngularCliServer(npmScript: "start");

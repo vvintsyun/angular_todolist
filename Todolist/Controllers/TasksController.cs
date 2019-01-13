@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Todolist.Models;
-using Task = Todolist.Models.Task;
+//using Task = Todolist.Models.Task;
 
 namespace Todolist.Controllers
 {
@@ -22,7 +22,7 @@ namespace Todolist.Controllers
 
         // GET: api/Tasks
         [HttpGet("byTasklistid")]
-        public IEnumerable<Task> GetTasks([FromQuery] int tasklistid)
+        public IEnumerable<Tasks> GetTasks([FromQuery] int tasklistid)
         {
             return _context.Tasks.Where(t => t.Tasklist.Id == tasklistid);
         }
@@ -48,7 +48,7 @@ namespace Todolist.Controllers
 
         // PUT: api/Tasks/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTask([FromRoute] int id, [FromBody] Task task)
+        public async Task<IActionResult> PutTask([FromRoute] int id, [FromBody] Tasks task)
         {
             if (!ModelState.IsValid)
             {
@@ -83,7 +83,7 @@ namespace Todolist.Controllers
 
         // POST: api/Tasks
         [HttpPost]
-        public async Task<IActionResult> PostTask([FromBody] Task task)
+        public async Task<IActionResult> PostTask([FromBody] Tasks task)
         {
             if (!ModelState.IsValid)
             {

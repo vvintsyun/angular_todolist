@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Todolist.Models;
-using Task = Todolist.Models.Task;
+//using Task = Todolist.Models.Task;
 
 namespace Todolist.Controllers
 {
@@ -41,7 +41,7 @@ namespace Todolist.Controllers
             return File(zipStream, "application/octet-stream", "My todolists.zip");
         }
 
-        private string GetTasklistContent(Tasklist tasklist, List<Task> tasks)
+        private string GetTasklistContent(Tasklists tasklist, List<Tasks> tasks)
         {
             string result = "";
             tasks.Where(t => t.Tasklist == tasklist).ToList().ForEach(t =>

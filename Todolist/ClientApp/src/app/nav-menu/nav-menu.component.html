@@ -1,29 +1,30 @@
 <div class='main-nav'>
     <div class='navbar navbar-inverse'>
-        <div class='navbar-header'>
-            <!--<button type='button' class='navbar-toggle' data-toggle='collapse' data-target='.navbar-collapse' [attr.aria-expanded]='isExpanded' (click)='toggle()'>
-                <span class='sr-only'>Toggle navigation</span>
-                <span class='icon-bar'></span>
-                <span class='icon-bar'></span>
-                <span class='icon-bar'></span>
-            </button>-->
-            <a class='navbar-brand' [routerLink]='["/"]'>Todolist</a>
+      <div class='navbar-header'>
+        <!--<button type='button' class='navbar-toggle' data-toggle='collapse' data-target='.navbar-collapse' [attr.aria-expanded]='isExpanded' (click)='toggle()'>
+      <span class='sr-only'>Toggle navigation</span>
+      <span class='icon-bar'></span>
+      <span class='icon-bar'></span>
+      <span class='icon-bar'></span>
+  </button>-->
+        <div *ngIf="isUserAuthenticated">
+          <h3>Hello {{userName}}</h3>
+          <button class="btn btn-dark btn-lg" (click)="logout()">Выход</button>
         </div>
+        <div *ngIf="!isUserAuthenticated">
+          <button class="btn btn-dark btn-lg" (click)="logout()">{{isUserAuthenticated}}</button>
+        </div>
+      </div>
         <div class='clearfix'></div>
         <div class='navbar-collapse collapse' [ngClass]='{ "in": isExpanded }'>
-          <ul class='nav navbar-nav'>
-            <li [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
-              <a [routerLink]='["/"]' (click)='collapse()'>
-                <span class='glyphicon glyphicon-home'></span> Home
-              </a>
-            </li>
+          <ul class='nav navbar-nav'>            
             <li *ngFor="let tl of tasklists" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
               <ng-template [ngIf]="tasklist?.id != tl.id" [ngIfElse]="edit">
                 <a [routerLink]='["/tasklist",tl?.id]' [name]="tl?.name" (click)='collapse()'>
                   <span class='glyphicon glyphicon-th-list'></span> {{tl?.name}}
-                </a>
-                <span class="glyphicon glyphicon-pencil" title="Переименовать" (click)="editTasklist(tl)" ></span>
-                <span class="glyphicon glyphicon-trash" title="Удалить" (click)="delete(tl)" ></span>
+                  <span class="glyphicon glyphicon-pencil" title="Переименовать" (click)="editTasklist(tl)"></span>
+                  <span class="glyphicon glyphicon-trash" title="Удалить" (click)="delete(tl)"></span>
+                </a>                
               </ng-template>
             </li>
             <li *ngIf="tableMode; else create">

@@ -6,6 +6,7 @@ import { tap } from 'rxjs/operators';
 
 
 export function checkIfUserIsAuthenticated(accountService: SecurityService) {
+  console.log('checkifuserauth');
   return () => accountService.updateUserAuthenticationStatus().toPromise();
 }
 
@@ -18,9 +19,18 @@ export class SecurityService {
 
   constructor(@Inject(DOCUMENT) private document: Document, private httpClient: HttpClient) { }
 
+  getUserName() {
+    return this.httpClient.get('/api/account/name', { responseType: 'text', withCredentials: true });
+  }
+
+  getUserId() {
+    return this.httpClient.get('/api/account/userid', { responseType: 'text', withCredentials: true });
+  }
+
   updateUserAuthenticationStatus() {
     return this.httpClient.get<boolean>('/api/account/isAuthenticated', { withCredentials: true }).pipe(tap(isAuthenticated => {
       this._isUserAuthenticatedSubject.next(isAuthenticated);
+      console.log(isAuthenticated + ' real');
     }));
   }
 }
@@ -35,8 +45,9 @@ export class LoginService {
   }
 
   logout() {
-    //this.httpClient.post('/account/logout').subscribe(_ => {
-    //  //redirect the user to a page that does not require authentication
+    this.document.location.href = '/account/logout';
+    //this.httpClient.get('/account/logout').subscribe(_ => {
+    //  this.document.location.href = '/';      
     //});
   }
 }

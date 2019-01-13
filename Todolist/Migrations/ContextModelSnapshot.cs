@@ -19,7 +19,22 @@ namespace Todolist.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Todolist.Models.Task", b =>
+            modelBuilder.Entity("Todolist.Models.Tasklists", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("Url");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tasklists");
+                });
+
+            modelBuilder.Entity("Todolist.Models.Tasks", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -38,25 +53,10 @@ namespace Todolist.Migrations
                     b.ToTable("Tasks");
                 });
 
-            modelBuilder.Entity("Todolist.Models.Tasklist", b =>
+            modelBuilder.Entity("Todolist.Models.Tasks", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Name");
-
-                    b.Property<string>("Url");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Tasklists");
-                });
-
-            modelBuilder.Entity("Todolist.Models.Task", b =>
-                {
-                    b.HasOne("Todolist.Models.Tasklist", "Tasklist")
-                        .WithMany()
+                    b.HasOne("Todolist.Models.Tasklists", "Tasklist")
+                        .WithMany("Tasks")
                         .HasForeignKey("TasklistId");
                 });
 #pragma warning restore 612, 618
