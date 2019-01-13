@@ -18,9 +18,10 @@ export class HomeComponent implements OnInit {
     this.subscription = this.accountService.isUserAuthenticated.subscribe(isAuthenticated => {
       this.isUserAuthenticated = isAuthenticated;
       if (this.isUserAuthenticated) {
-        this.accountService.getUserName().subscribe(theName => {
-          this.userName = theName;
-        });
+        //this.accountService.getUserName().subscribe(theName => {
+        //  this.userName = theName;
+        //});
+        location.href = '/home';
       }
     });
   } 
@@ -28,7 +29,7 @@ export class HomeComponent implements OnInit {
   login() {
     this.loginService.login();
   }
-  logout() {
-    this.loginService.logout();
-  }
+  //logout() {
+  //  this.loginService.logout();
+  //}
 }

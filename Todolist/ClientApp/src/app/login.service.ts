@@ -44,24 +44,9 @@ export class LoginService {
   }
 
   logout() {
-    this.httpClient.post('/account/logout', { withCredentials: true }).subscribe();
-    this.accountService.updateUserAuthenticationStatus().subscribe();
+    this.httpClient.post('/account/logout', { withCredentials: true }).subscribe(_ => {
+      this.accountService.updateUserAuthenticationStatus().subscribe();
+    });    
     this.document.location.href = '/';    
   }
 }
-
-//@Injectable()
-//export class Interceptor401Service implements HttpInterceptor {
-
-//  constructor(private accountService: SecurityService) { }
-
-//  intercept(req: HttpRequest<any>, next: HttpHandler) {
-
-//    return next.handle(req).pipe(tap(nonErrorEvent => {
-//      //nothing to do there
-//    }, (error: HttpErrorResponse) => {
-//      if (error.status === 401)
-//        this.accountService.setUserAsNotAuthenticated();
-//    }));
-//  }
-//}
