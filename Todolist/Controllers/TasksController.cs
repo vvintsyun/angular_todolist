@@ -90,8 +90,8 @@ namespace Todolist.Controllers
                 return BadRequest(ModelState);
             }
 
-            _context.Tasks.Add(task);
-            await _context.SaveChangesAsync();
+            _context.Tasks.Add(task);            
+            await _context.SaveChangesAsync();  
 
             return CreatedAtAction("GetTask", new { id = task.Id }, task);
         }

@@ -5,5 +5,6 @@ export class Task {
     public id?: number,
     public description?: string,
     public tasklist?: Tasklist,
+    public tasklistid?: number,
     public iscompleted?: boolean) { }
 }

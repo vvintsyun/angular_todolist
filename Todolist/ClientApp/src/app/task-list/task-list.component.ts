@@ -21,7 +21,7 @@ export class TaskListComponent implements OnInit {
   tasklist: Tasklist;
   tasklistid: number;
 
-  constructor(private taskDataService: TaskDataService, private taskListDataService: TasklistDataService, private route: ActivatedRoute, private loginService: SecurityService) {
+  constructor(private taskDataService: TaskDataService, private taskListDataService: TasklistDataService, private route: ActivatedRoute) {
   }
 
   ngOnInit() {    
@@ -46,8 +46,8 @@ export class TaskListComponent implements OnInit {
   
   save() {
     if (this.task.id == null) {
-      this.task.tasklist = this.tasklist;
-      //this.tasklist.user = this.loginService.getUserId();
+      //this.task.tasklist = this.tasklist;      
+      this.task.tasklistid = this.tasklist.id;      
       this.taskDataService.createTask(this.task)
         .subscribe((data: Task) => this.tasks.push(data));
     } else {

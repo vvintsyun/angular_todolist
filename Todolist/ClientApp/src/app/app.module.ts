@@ -26,7 +26,7 @@ import { HomeComponent } from './home/home.component';
     FormsModule,
     AppRoutingModule
   ],
-  providers: [{ provide: APP_INITIALIZER, useFactory: checkIfUserIsAuthenticated, multi: true, deps: [SecurityService] }/*{ provide: HTTP_INTERCEPTORS, useClass: Interceptor401Service, multi: true }*/],
+  //providers: [{ provide: APP_INITIALIZER, useFactory: checkIfUserIsAuthenticated, multi: true, deps: [SecurityService] }/*{ provide: HTTP_INTERCEPTORS, useClass: Interceptor401Service, multi: true }*/],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

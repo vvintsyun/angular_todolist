@@ -28,4 +28,7 @@ export class HomeComponent implements OnInit {
   login() {
     this.loginService.login();
   }
+  logout() {
+    this.loginService.logout();
+  }
 }

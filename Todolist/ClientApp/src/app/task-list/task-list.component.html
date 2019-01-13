@@ -5,22 +5,22 @@
     </div>
     <div class='col-sm-9 body-content'>
       <h1>{{tasklist?.name}}</h1>        
-      <input type="button" value="Добавить" class="btn btn-default" (click)="add()" />
+      <input type="button" value="Новая задача" class="btn btn-default" (click)="add()" />
       <table *ngIf="tableMode; else create" class="table table-striped">
         <thead>
           <!--*ngIf="typeof this.tasks !== 'undefined'"-->
           <tr>
-            <td>Описание</td>
-            <td>Выполнена</td>
-            <td></td>
+            <td width="70%">Описание</td>
+            <td width="10%">Выполнена</td>
+            <td width="20%"></td>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let t of tasks">
             <ng-template [ngIf]="task?.id != t.id" [ngIfElse]="edit">
-              <td width="70%">{{t?.description}}</td>
-              <td width="10%"><input type="checkbox" checked="{{t?.iscompleted ? 'checked' : ''}}" onclick="return false;" /></td>
-              <td width="20%">
+              <td>{{t?.description}}</td>
+              <td><input type="checkbox" checked="{{t?.iscompleted ? 'checked' : ''}}" onclick="return false;" /></td>
+              <td>
                 <button class="btn btn-sm btn-primary" (click)="editTask(t)">Изменить</button>
                 <button class="btn btn-sm btn-danger" (click)="delete(t)">Удалить</button>
               </td>
@@ -43,11 +43,11 @@
       </ng-template>
 
       <ng-template #create>
-        <div class="form-group">
+        <div class="form-group" style="width:50%;">
           <label>Описание</label>
           <input type="text" [(ngModel)]="task.description" class="form-control" />
         </div>
-        <div class="form-group">
+        <div class="form-group" style="width:30px">
           <label>Выполнена</label>
           <input type="checkbox" [(ngModel)]="task.iscompleted" class="form-control" />
         </div>

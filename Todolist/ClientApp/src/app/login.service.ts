@@ -6,7 +6,6 @@ import { tap } from 'rxjs/operators';
 
 
 export function checkIfUserIsAuthenticated(accountService: SecurityService) {
-  console.log('checkifuserauth');
   return () => accountService.updateUserAuthenticationStatus().toPromise();
 }
 
@@ -30,7 +29,6 @@ export class SecurityService {
   updateUserAuthenticationStatus() {
     return this.httpClient.get<boolean>('/api/account/isAuthenticated', { withCredentials: true }).pipe(tap(isAuthenticated => {
       this._isUserAuthenticatedSubject.next(isAuthenticated);
-      console.log(isAuthenticated + ' real');
     }));
   }
 }
@@ -38,17 +36,17 @@ export class SecurityService {
 @Injectable()
 export class LoginService {
 
-  constructor(@Inject(DOCUMENT) private document: Document, private httpClient: HttpClient) { }
+  constructor(@Inject(DOCUMENT) private document: Document, private httpClient: HttpClient, private accountService: SecurityService) { }
 
   login() {
     this.document.location.href = '/api/account/google-login';
+    this.accountService.updateUserAuthenticationStatus().subscribe();
   }
 
   logout() {
-    this.document.location.href = '/account/logout';
-    //this.httpClient.get('/account/logout').subscribe(_ => {
-    //  this.document.location.href = '/';      
-    //});
+    this.httpClient.post('/account/logout', { withCredentials: true }).subscribe();
+    this.accountService.updateUserAuthenticationStatus().subscribe();
+    this.document.location.href = '/';    
   }
 }
 

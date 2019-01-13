@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,10 +24,10 @@ namespace Todolist.Controllers
         }
 
         // GET: api/Tasklists
-        [HttpGet]
-        public IEnumerable<Tasklists> GetTasklists()
+        [HttpGet("byUserid")]
+        public IEnumerable<Tasklists> GetTasklists([FromQuery] string userid)
         {
-            return _context.Tasklists;
+            return _context.Tasklists.Where(tl => tl.User == userid);
         }
 
         // GET: api/Tasklists/5
@@ -120,6 +123,69 @@ namespace Todolist.Controllers
         private bool TasklistExists(int id)
         {
             return _context.Tasklists.Any(e => e.Id == id);
+        }
+
+        [HttpGet]
+        [Route("downloadzip")]
+        public ActionResult DownloadZip([FromQuery] string userid)
+        {
+            var tasklists = _context.Tasklists.Where(q => q.User == userid);//todo non empty
+            var tasks = _context.Tasks.Where(t => tasklists.Contains(t.Tasklist)).ToList();
+            var zipItems = tasklists.Select(t => new ZipItem($"{t.Name}.txt", new MemoryStream(Encoding.UTF8.GetBytes(GetTasklistContent(t, tasks))))).ToList();
+            var zipStream = Zipper.Zip(zipItems);
+            return File(zipStream, "application/octet-stream", "My todolists.zip");
+        }
+
+        private string GetTasklistContent(Tasklists tasklist, List<Tasks> tasks)
+        {
+            string result = "";
+            tasks.Where(t => t.Tasklist == tasklist).ToList().ForEach(t =>
+            {
+                string iscomplete = t.Iscompleted ? "[Выполнена]" : "[Не выполнена]";
+                result += $"{t.Description} {iscomplete}" + Environment.NewLine;
+            });
+            return result;
+        }
+
+        public class ZipItem
+        {
+            public string Name { get; set; }
+            public Stream Content { get; set; }
+            public ZipItem(string name, Stream content)
+            {
+                this.Name = name;
+                this.Content = content;
+            }
+            public ZipItem(string name, string contentStr, Encoding encoding)
+            {
+                // convert string to stream
+                var byteArray = encoding.GetBytes(contentStr);
+                var memoryStream = new MemoryStream(byteArray);
+                this.Name = name;
+                this.Content = memoryStream;
+            }
+        }
+
+        public static class Zipper
+        {
+            public static Stream Zip(List<ZipItem> zipItems)
+            {
+                var zipStream = new MemoryStream();
+
+                using (var zip = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+                {
+                    foreach (var zipItem in zipItems)
+                    {
+                        var entry = zip.CreateEntry(zipItem.Name);
+                        using (var entryStream = entry.Open())
+                        {
+                            zipItem.Content.CopyTo(entryStream);
+                        }
+                    }
+                }
+                zipStream.Position = 0;
+                return zipStream;
+            }
         }
     }
 }
