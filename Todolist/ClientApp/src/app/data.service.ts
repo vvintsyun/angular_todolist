@@ -18,7 +18,8 @@ export class TaskDataService {
     createTask(task: Task) {
         return this.http.post(this.url, task);
     }
-    updateTask(task: Task) {  
+    updateTask(task: Task) {
+      console.log(task);
       return this.http.put(this.url + '/' + task.id, task);
     }
     deleteTask(id: number) {
@@ -32,6 +33,14 @@ export class TasklistDataService {
   private url = "/api/tasklists";
 
   constructor(private http: HttpClient) {
+  }
+
+  getTasklistUrl(id: number) {
+    return this.http.get(this.url + '/geturl', { params: { "tasklistid": id.toString() }, responseType: 'text' });
+  }
+
+  getTasklistIdbyUrl(url: string) {
+    return this.http.get(this.url + '/TasklistIdbyUrl', { params: { "url": url } });
   }
 
   getTasklists(userid: string) {

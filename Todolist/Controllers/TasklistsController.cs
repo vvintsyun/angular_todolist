@@ -30,6 +30,13 @@ namespace Todolist.Controllers
             return _context.Tasklists.Where(tl => tl.User == userid);
         }
 
+        // GET: api/Tasklists
+        [HttpGet("TasklistIdbyUrl")]
+        public int GetTasklistidByUrl([FromQuery] string url)
+        {
+            return _context.Tasklists.First(tl => tl.Url == url).Id;
+        }
+
         // GET: api/Tasklists/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTasklist([FromRoute] int id)
@@ -125,6 +132,25 @@ namespace Todolist.Controllers
             return _context.Tasklists.Any(e => e.Id == id);
         }
 
+        [Route("geturl")]
+        public string GetUrl([FromQuery] int tasklistid)
+        {
+            var tasklist = _context.Tasklists.First(tl => tl.Id == tasklistid);
+            var busyUrls = _context.Tasklists.Select(tl => tl.Url).ToList();
+            if (string.IsNullOrEmpty(tasklist.Url))
+            {
+                string newUrl;
+                do
+                {
+                    newUrl = RandomURL.GetURL();
+                }
+                while (busyUrls.Contains(newUrl));
+                tasklist.Url = newUrl;
+                _context.SaveChanges();
+            }
+            return tasklist.Url;
+        }
+
         [HttpGet]
         [Route("downloadzip")]
         public ActionResult DownloadZip([FromQuery] string userid)
@@ -185,6 +211,37 @@ namespace Todolist.Controllers
                 }
                 zipStream.Position = 0;
                 return zipStream;
+            }
+        }
+
+        public static class RandomURL
+        {
+            private static List<int> numbers = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+            private static List<char> characters = new List<char>()
+            {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+            'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B',
+            'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+            'Q', 'R', 'S',  'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '-', '_'};
+
+            public static string GetURL()
+            {
+                string URL = "";
+                Random rand = new Random();
+                for (int i = 0; i <= 10; i++)
+                { 
+                    int random = rand.Next(0, 3);
+                    if (random == 1) //add number
+                    {                          
+                        random = rand.Next(0, numbers.Count);
+                        URL += numbers[random].ToString();
+                    }
+                    else
+                    {
+                        random = rand.Next(0, characters.Count);
+                        URL += characters[random].ToString();
+                    }
+                }
+                return URL;
             }
         }
     }

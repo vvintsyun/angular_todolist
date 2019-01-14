@@ -4,9 +4,7 @@ import {TaskDataService, TasklistDataService} from '../data.service';
 import {ActivatedRoute} from '@angular/router';
 import { LoginService, SecurityService } from '../login.service';
 import { Tasklist } from '../tasklist';
-import { NavMenuComponent } from '../nav-menu/nav-menu.component';
-import { Subscription } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { PlatformLocation } from '@angular/common';
 
 @Component({
   selector: 'app-task-list',
@@ -20,8 +18,12 @@ export class TaskListComponent implements OnInit {
   tableMode: boolean = true;
   tasklist: Tasklist;
   tasklistid: number;
+  showHeader: boolean;
+  tasklisturl: string; 
+  readonly urlPath: string; 
 
-  constructor(private taskDataService: TaskDataService, private taskListDataService: TasklistDataService, private route: ActivatedRoute) {
+  constructor(private taskDataService: TaskDataService, private taskListDataService: TasklistDataService, private route: ActivatedRoute, private accountService: SecurityService, private location: PlatformLocation) {
+    this.urlPath = (location as any).location.origin;
   }
 
   ngOnInit() {    
@@ -30,18 +32,28 @@ export class TaskListComponent implements OnInit {
       //console.log('Task list id: ' + this.tasklistid);
       this.loadTasklist(this.tasklistid);
       this.loadTasks(this.tasklistid);
+      this.tasklisturl = undefined;
     });
-    //this.tableMode = this.tasks.length > 0;
-  }    
+  }
 
+  getUrl() {
+    this.taskListDataService.getTasklistUrl(this.tasklistid).subscribe(url => { this.tasklisturl = this.urlPath + '/tasklistbyurl/' + url; });
+  }
+
+  checkUserAccess() {
+    this.accountService.getUserId().subscribe(userid => {
+      if (this.tasklist.user != userid) location.href = '/home';
+    });
+  }
+  
   loadTasklist(tasklistid: number) {
     this.taskListDataService.getTasklist(tasklistid)
-      .subscribe((data: Tasklist) => this.tasklist = data);
+      .subscribe((data: Tasklist) => { this.tasklist = data; if (typeof data !== 'undefined') this.checkUserAccess(); });
   }
 
   loadTasks(tasklistid: number) {
     this.taskDataService.getTasks(tasklistid)
-      .subscribe((data: Task[]) => this.tasks = data);
+      .subscribe((data: Task[]) => { this.tasks = data; this.showHeader = this.tasks.length > 0; });
   }
   
   save() {

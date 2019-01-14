@@ -1,0 +1,25 @@
+<div class='container-fluid'>
+  <div class='row'>
+    <div class='col-sm-3'>      
+      <app-nav-menu></app-nav-menu>
+    </div>
+    <div class='col-sm-9 body-content'>
+      <h1>{{tasklist?.name}}</h1>      
+      <table class="table table-striped">
+        <thead>
+          <tr *ngIf="showHeader">
+            <td width="70%">Описание</td>
+            <td width="10%">Выполнена</td>
+            <td width="20%"></td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of tasks">            
+            <td>{{t?.description}}</td>
+            <td><input type="checkbox" checked="{{t?.iscompleted ? 'checked' : ''}}" (click)="changeCompleted(t)" /></td> 
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -3,13 +3,14 @@
     <div class='col-sm-3'>
       <app-nav-menu></app-nav-menu>
     </div>
-    <div class='col-sm-9 body-content'>
-      <h1>{{tasklist?.name}}</h1>        
+    <div class='col-sm-9 body-content' *ngIf="this.tasklistid">
+      <h1>{{tasklist?.name}}</h1>
       <input type="button" value="Новая задача" class="btn btn-default" (click)="add()" />
+      <input type="button" value="Получить ссылку" class="btn btn-default" (click)="getUrl()" />
+      <input type="text" value="{{tasklisturl}}" *ngIf="this.tasklisturl" style="width:320px"/>
       <table *ngIf="tableMode; else create" class="table table-striped">
         <thead>
-          <!--*ngIf="typeof this.tasks !== 'undefined'"-->
-          <tr>
+          <tr *ngIf="showHeader">
             <td width="70%">Описание</td>
             <td width="10%">Выполнена</td>
             <td width="20%"></td>

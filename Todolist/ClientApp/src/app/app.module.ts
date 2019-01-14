@@ -11,13 +11,15 @@ import {TaskListComponent} from './task-list/task-list.component';
 //import { Interceptor401Service } from './login.service';
 import { checkIfUserIsAuthenticated, SecurityService } from './login.service';
 import { HomeComponent } from './home/home.component';
+import { TaskListUrlComponent } from './task-list/task-list-url.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     NavMenuComponent,
     TaskListComponent,
-    HomeComponent
+    HomeComponent,
+    TaskListUrlComponent
   ],
   imports: [
     BrowserModule,
