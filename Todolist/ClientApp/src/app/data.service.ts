@@ -34,6 +34,10 @@ export class TasklistDataService {
   constructor(private http: HttpClient) {
   }
 
+  getTasklistUrl(id: number) {
+    return this.http.get<string>(this.url + '/geturl', { params: { "tasklistid": id.toString() } });
+  }
+
   getTasklists(userid: string) {
     return this.http.get(this.url + '/byUserid', { params: { "userid": userid} });
   }

@@ -21,6 +21,7 @@ export class TaskListComponent implements OnInit {
   tasklist: Tasklist;
   tasklistid: number;
   showHeader: boolean;
+  tasklisturl: string;
 
   constructor(private taskDataService: TaskDataService, private taskListDataService: TasklistDataService, private route: ActivatedRoute, private accountService: SecurityService) {
   }
@@ -32,6 +33,10 @@ export class TaskListComponent implements OnInit {
       this.loadTasklist(this.tasklistid);
       this.loadTasks(this.tasklistid);
     });
+  }
+
+  getUrl() {
+    this.taskListDataService.getTasklistUrl(this.tasklistid).subscribe(url => this.tasklisturl = url);
   }
 
   checkUserAccess() {

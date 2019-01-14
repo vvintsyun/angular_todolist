@@ -4,8 +4,10 @@
       <app-nav-menu></app-nav-menu>
     </div>
     <div class='col-sm-9 body-content' *ngIf="this.tasklistid">
-      <h1>{{tasklist?.name}}</h1>        
+      <h1>{{tasklist?.name}}</h1>
       <input type="button" value="Новая задача" class="btn btn-default" (click)="add()" />
+      <input type="button" value="Получить ссылку" class="btn btn-default" (click)="getUrl()" />
+      <input type="text" value="{{tasklisturl}}" *ngIf="this.tasklisturl"/>
       <table *ngIf="tableMode; else create" class="table table-striped">
         <thead>
           <!--*-->
