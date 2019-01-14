@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,23 +26,14 @@ namespace Todolist.Controllers
         {
             var authenticationProperties = _signInManager.ConfigureExternalAuthenticationProperties("Google", Url.Action(nameof(HandleExternalLogin)));
             return Challenge(authenticationProperties, "Google");
-        }
+        }        
 
-        [HttpGet("/api/account/isAuthenticated")]
-        public bool IsAuthenticated()
-        {
-            var x = User;
-            var q = _signInManager.IsSignedIn(x);
-            var info = _signInManager.GetExternalLoginInfoAsync();
-            return false;
-        }
-
-        [HttpGet("/signin-google")]
+        //[HttpGet("/signin-google")]
         public async Task<IActionResult> HandleExternalLogin()
         {
-            var info = await _signInManager.GetExternalLoginInfoAsync();var qwe = _signInManager.GetExternalAuthenticationSchemesAsync();
+            var info = await _signInManager.GetExternalLoginInfoAsync();
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
-
+            
             if (!result.Succeeded) //user does not exist yet
             {
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);
@@ -62,7 +54,38 @@ namespace Todolist.Controllers
                 await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             }
 
-            return Redirect("http://localhost:4200");
+            return Redirect("/home");
+        }
+
+        [Route("/account/logout")]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return Redirect("/");
+        }
+
+
+        [Route("/api/account/name")]
+        [Authorize]
+        public IActionResult Name()
+        {
+            var claimsPrincial = (ClaimsPrincipal)User;
+            var givenName = claimsPrincial.FindFirst(ClaimTypes.GivenName).Value;
+            return Ok(givenName);
+        }
+
+        [Route("/api/account/userid")]
+        [Authorize]
+        public IActionResult Id()
+        {
+            return Ok(_userManager.GetUserId(User));
+        }
+
+        [Route("/api/account/isAuthenticated")]
+        public IActionResult IsAuthenticated()
+        {
+            return new ObjectResult(User.Identity.IsAuthenticated);
         }
     }
 }

@@ -34,8 +34,8 @@ export class TasklistDataService {
   constructor(private http: HttpClient) {
   }
 
-  getTasklists() {
-    return this.http.get(this.url);
+  getTasklists(userid: string) {
+    return this.http.get(this.url + '/byUserid', { params: { "userid": userid} });
   }
 
   getTasklist(id: number) {
@@ -50,5 +50,9 @@ export class TasklistDataService {
   }
   deleteTasklist(id: number) {
     return this.http.delete(this.url + '/' + id);
+  }
+  downloadlists(userid: string) {
+    //return this.http.post(this.url + '/downloadzip', userid);
+    location.href = this.url + '/downloadzip/?userid=' + userid;
   }
 }

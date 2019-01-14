@@ -18,6 +18,14 @@ export class SecurityService {
 
   constructor(@Inject(DOCUMENT) private document: Document, private httpClient: HttpClient) { }
 
+  getUserName() {
+    return this.httpClient.get('/api/account/name', { responseType: 'text', withCredentials: true });
+  }
+
+  getUserId() {
+    return this.httpClient.get('/api/account/userid', { responseType: 'text', withCredentials: true });
+  }
+
   updateUserAuthenticationStatus() {
     return this.httpClient.get<boolean>('/api/account/isAuthenticated', { withCredentials: true }).pipe(tap(isAuthenticated => {
       this._isUserAuthenticatedSubject.next(isAuthenticated);
@@ -28,31 +36,17 @@ export class SecurityService {
 @Injectable()
 export class LoginService {
 
-  constructor(@Inject(DOCUMENT) private document: Document, private httpClient: HttpClient) { }
+  constructor(@Inject(DOCUMENT) private document: Document, private httpClient: HttpClient, private accountService: SecurityService) { }
 
   login() {
     this.document.location.href = '/api/account/google-login';
+    this.accountService.updateUserAuthenticationStatus().subscribe();
   }
 
   logout() {
-    //this.httpClient.post('/account/logout').subscribe(_ => {
-    //  //redirect the user to a page that does not require authentication
-    //});
+    this.httpClient.post('/account/logout', { withCredentials: true }).subscribe(_ => {
+      this.accountService.updateUserAuthenticationStatus().subscribe();
+    });    
+    this.document.location.href = '/';    
   }
 }
-
-//@Injectable()
-//export class Interceptor401Service implements HttpInterceptor {
-
-//  constructor(private accountService: SecurityService) { }
-
-//  intercept(req: HttpRequest<any>, next: HttpHandler) {
-
-//    return next.handle(req).pipe(tap(nonErrorEvent => {
-//      //nothing to do there
-//    }, (error: HttpErrorResponse) => {
-//      if (error.status === 401)
-//        this.accountService.setUserAsNotAuthenticated();
-//    }));
-//  }
-//}
