@@ -155,9 +155,16 @@ namespace Todolist.Controllers
         [Route("downloadzip")]
         public ActionResult DownloadZip([FromQuery] string userid)
         {
-            var tasklists = _context.Tasklists.Where(q => q.User == userid);//todo non empty
+            var tasklists = _context.Tasklists.Where(q => q.User == userid).ToList();//todo non empty
             var tasks = _context.Tasks.Where(t => tasklists.Contains(t.Tasklist)).ToList();
-            var zipItems = tasklists.Select(t => new ZipItem($"{t.Name}.txt", new MemoryStream(Encoding.UTF8.GetBytes(GetTasklistContent(t, tasks))))).ToList();
+            List<ZipItem> zipItems = new List<ZipItem>();
+            tasklists.ForEach(tl => 
+            {
+                var content = new MemoryStream(Encoding.UTF8.GetBytes(GetTasklistContent(tl, tasks)));
+                var item = new ZipItem($"{tl.Name}.txt", content);
+                zipItems.Add(item);
+            });
+            
             var zipStream = Zipper.Zip(zipItems);
             return File(zipStream, "application/octet-stream", "My todolists.zip");
         }

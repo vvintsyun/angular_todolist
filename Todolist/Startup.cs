@@ -45,20 +45,15 @@ namespace Todolist
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<IdentityDbContext>()
                 .AddDefaultTokenProviders();
-
-            //services.AddDefaultIdentity<IdentityUser>()
-            //    .AddEntityFrameworkStores<Context>()
-            //    .AddDefaultTokenProviders();
-            //IdentityCookieAuthenticationBuilderExtensions.AddExternalCookie();
-            //services.ConfigureApplicationCookie(options => options.LoginPath = "/Account/LogIn");            
+            
             services.AddAuthentication(options =>
                 {
                     options.DefaultSignOutScheme = IdentityConstants.ApplicationScheme;
                 })
                 .AddGoogle("Google", options =>
                 {
-                     options.ClientId = Configuration["auth:google:clientid"];
-                     options.ClientSecret = Configuration["auth:google:clientsecret"];
+                     options.ClientId = "441536850343-pmeb3mcvb94vdv80ob20tkuq55qdjlda.apps.googleusercontent.com";// Configuration["auth:google:clientid"];
+                     options.ClientSecret = "DW6AVEMxcxNbFs9p84eKXWnu";// Configuration["auth:google:clientsecret"];
                      options.CallbackPath = new Microsoft.AspNetCore.Http.PathString("/signin-google");
                      options.Events = new OAuthEvents
                      {
@@ -69,9 +64,6 @@ namespace Todolist
                             return System.Threading.Tasks.Task.CompletedTask;
                          }
                      };
-                    //options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "UserId");
-                    //options.ClaimActions.MapJsonKey(ClaimTypes.Email, "EmailAddress", ClaimValueTypes.Email);
-                    //options.ClaimActions.MapJsonKey(ClaimTypes.Name, "Name");
                 });   
 
             services.AddCors(corsOptions =>
@@ -91,18 +83,8 @@ namespace Todolist
             {
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
-            }
+            }            
             
-            //app.UseHttpsRedirection();
-            //app.UseStaticFiles();
-            //app.UseSpaStaticFiles();
-
-            //app.UseMvc(routes =>
-            //{
-            //    routes.MapRoute(
-            //        name: "default",
-            //        template: "{controller}/{action=Index}/{id?}");
-            //});
             app.UseAuthentication();
             app.UseMvcWithDefaultRoute();
             app.UseCors("fully permissive");
