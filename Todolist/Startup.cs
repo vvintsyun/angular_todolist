@@ -52,8 +52,8 @@ namespace Todolist
                 })
                 .AddGoogle("Google", options =>
                 {
-                     options.ClientId = "441536850343-pmeb3mcvb94vdv80ob20tkuq55qdjlda.apps.googleusercontent.com";// Configuration["auth:google:clientid"];
-                     options.ClientSecret = "DW6AVEMxcxNbFs9p84eKXWnu";// Configuration["auth:google:clientsecret"];
+                     options.ClientId = Configuration.GetSection("GoogleClientSecret")["auth:google:clientid"];
+                     options.ClientSecret = Configuration.GetSection("GoogleClientSecret")["auth:google:clientsecret"];
                      options.CallbackPath = new Microsoft.AspNetCore.Http.PathString("/signin-google");
                      options.Events = new OAuthEvents
                      {
