@@ -2,29 +2,34 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Task } from './task';
 import { Tasklist } from './tasklist';
- 
+
 @Injectable()
 export class TaskDataService {
- 
-    private url = "/api/tasks";
- 
-    constructor(private http: HttpClient) {
-    }
- 
-    getTasks(tasklistid: number) {
-      return this.http.get(this.url + '/byTasklistid', {params: { "tasklistid": tasklistid.toString()} });
-    }
- 
-    createTask(task: Task) {
-        return this.http.post(this.url, task);
-    }
-    updateTask(task: Task) {
-      console.log(task);
-      return this.http.put(this.url + '/' + task.id, task);
-    }
-    deleteTask(id: number) {
-        return this.http.delete(this.url + '/' + id);
-    }
+
+  private url = "/api/tasks";
+
+  constructor(private http: HttpClient) {
+  }
+
+  getTasks(tasklistid: number) {
+    return this.http.get(this.url + '/byTasklistid', {params: { "tasklistid": tasklistid.toString()} });
+  }
+
+  getTasksByUrl(url: string) {
+    return this.http.get(this.url + '/byTasklistUrl', {params: { "tasklistUrl": url} });
+  }
+
+  createTask(task: Task) {
+    return this.http.post(this.url, task);
+  }
+
+  updateTask(task: Task) {
+    return this.http.put(this.url + '/' + task.id, task);
+  }
+
+  deleteTask(id: number) {
+    return this.http.delete(this.url + '/' + id);
+  }
 }
 
 @Injectable()
@@ -36,32 +41,34 @@ export class TasklistDataService {
   }
 
   getTasklistUrl(id: number) {
-    return this.http.get(this.url + '/geturl', { params: { "tasklistid": id.toString() }, responseType: 'text' });
+    return this.http.get(this.url + '/geturl/' + id);
   }
 
-  getTasklistIdbyUrl(url: string) {
-    return this.http.get(this.url + '/TasklistIdbyUrl', { params: { "url": url } });
-  }
-
-  getTasklists(userid: string) {
-    return this.http.get(this.url + '/byUserid', { params: { "userid": userid} });
+  getAllTasklists() {
+    return this.http.get(this.url);
   }
 
   getTasklist(id: number) {
     return this.http.get(this.url + '/' + id);
   }
 
+  getTasklistByUrl(url: string) {
+    return this.http.get(this.url + '/TasklistByUrl/' + url);
+  }
+
   createTasklist(tasklist: Tasklist) {
     return this.http.post(this.url, tasklist);
   }
+
   updateTasklist(tasklist: Tasklist) {
     return this.http.put(this.url + '/' + tasklist.id, tasklist);
   }
+
   deleteTasklist(id: number) {
     return this.http.delete(this.url + '/' + id);
   }
-  downloadlists(userid: string) {
-    //return this.http.post(this.url + '/downloadzip', userid);
-    location.href = this.url + '/downloadzip/?userid=' + userid;
+
+  downloadlists() {
+    location.href = this.url + '/downloadzip';
   }
 }

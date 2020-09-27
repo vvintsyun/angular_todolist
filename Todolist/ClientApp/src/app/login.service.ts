@@ -44,9 +44,9 @@ export class LoginService {
   }
 
   logout() {
-    this.httpClient.post('/account/logout', { withCredentials: true }).subscribe(_ => {
+    this.httpClient.post('/api/account/logout', { withCredentials: true }).subscribe(_ => {
       this.accountService.updateUserAuthenticationStatus().subscribe();
-    });    
-    this.document.location.href = '/';    
+    });
+    this.document.location.href = '/';
   }
 }

@@ -1,0 +1,42 @@
+<div class='main-nav'>
+    <div class='navbar navbar-inverse'>
+      <div class='navbar-header'>
+        <div *ngIf="isUserAuthenticated">
+          <h3 style="color: white" *ngIf="userName">Hello {{userName}}</h3>
+          <button class="btn btn-dark btn-lg" style="margin-right: 5px" (click)="downloadzip()">Download lists</button>
+          <button class="btn btn-dark btn-lg" (click)="logout()">Logout</button>
+        </div>
+      </div>
+        <div class='clearfix'></div>
+        <div class='navbar-collapse collapse' [ngClass]='{ "in": isExpanded }'>
+          <ul class='nav navbar-nav'>
+            <li *ngFor="let tl of tasklists" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
+              <ng-template [ngIf]="tasklist?.id != tl.id" [ngIfElse]="edit">
+                <a [routerLink]='["/tasklist",tl?.id]' [name]="tl?.name" (click)='collapse()'>
+                  <span class='glyphicon glyphicon-th-list'></span> {{tl?.name}}
+                  <span class="glyphicon glyphicon-pencil" title="Rename" (click)="editTasklist(tl)"></span>
+                  <span class="glyphicon glyphicon-trash" title="Delete" (click)="delete($event, tl)"></span>
+                </a>
+              </ng-template>
+            </li>
+            <li *ngIf="tableMode; else create">
+              <a *ngIf="isUserAuthenticated"><span class='glyphicon glyphicon-plus' title="Create task list" (click)='add()'></span></a>
+            </li>
+            <ng-template #create>
+              <li>
+                <input type="text" [(ngModel)]="tasklist.name" class="form-control" />
+                <span title="Save" (click)="save()" class="glyphicon glyphicon-ok white-item"></span>
+                <span title="Cancel" (click)="cancel()" class="glyphicon glyphicon-remove white-item"></span>
+              </li>
+            </ng-template>
+            <ng-template #edit>
+              <li>
+                <input type="text" [(ngModel)]="tasklist.name" class="form-control" />
+                <span title="Save" (click)="save()" class="glyphicon glyphicon-ok white-item"></span>
+                <span title="Cancel" (click)="cancel()" class="glyphicon glyphicon-remove white-item"></span>
+              </li>
+            </ng-template>
+          </ul>
+        </div>
+    </div>
+</div>

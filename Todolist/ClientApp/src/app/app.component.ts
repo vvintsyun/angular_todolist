@@ -11,7 +11,7 @@ import { LoginService, SecurityService, checkIfUserIsAuthenticated } from './log
 export class AppComponent implements OnInit  {
   public constructor(private accountService: SecurityService) {
   }
-  public ngOnInit() {    
+  public ngOnInit() {
     this.accountService.updateUserAuthenticationStatus().subscribe(checkIfUserIsAuthenticated(this.accountService));
   }
 }

@@ -1,22 +1,25 @@
 <div class='container-fluid'>
   <div class='row'>
-    <div class='col-sm-3'>      
-      <app-nav-menu></app-nav-menu>
+    <div class='col-sm-3'>
+      <app-user-lists></app-user-lists>
     </div>
     <div class='col-sm-9 body-content'>
-      <h1>{{tasklist?.name}}</h1>      
+      <h1>{{tasklist?.name}}</h1>
       <table class="table table-striped">
         <thead>
-          <tr *ngIf="showHeader">
-            <td width="70%">Описание</td>
-            <td width="10%">Выполнена</td>
+          <tr *ngIf="!isEmpty">
+            <td width="70%">Description</td>
+            <td width="10%">Completed</td>
             <td width="20%"></td>
+          </tr>
+          <tr *ngIf="isEmpty">
+            No tasks
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let t of tasks">            
+          <tr *ngFor="let t of tasks">
             <td>{{t?.description}}</td>
-            <td><input type="checkbox" checked="{{t?.iscompleted ? 'checked' : ''}}" (click)="changeCompleted(t)" /></td> 
+            <td><input type="checkbox" checked="{{t?.iscompleted ? 'checked' : ''}}" (click)="changeCompleted(t)" /></td>
           </tr>
         </tbody>
       </table>

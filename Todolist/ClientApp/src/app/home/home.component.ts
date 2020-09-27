@@ -10,7 +10,6 @@ import { HttpClient } from '@angular/common/http';
 export class HomeComponent implements OnInit {
   isUserAuthenticated = false;
   subscription: Subscription;
-  userName: string;
 
   constructor(private httpClient: HttpClient, private accountService: SecurityService, private loginService: LoginService) { }
 
@@ -18,18 +17,12 @@ export class HomeComponent implements OnInit {
     this.subscription = this.accountService.isUserAuthenticated.subscribe(isAuthenticated => {
       this.isUserAuthenticated = isAuthenticated;
       if (this.isUserAuthenticated) {
-        //this.accountService.getUserName().subscribe(theName => {
-        //  this.userName = theName;
-        //});
         location.href = '/home';
       }
     });
-  } 
+  }
 
   login() {
     this.loginService.login();
   }
-  //logout() {
-  //  this.loginService.logout();
-  //}
 }

@@ -1,3 +1,5 @@
+using System.IO;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
@@ -12,28 +14,31 @@ using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Security.Claims;
-using Todolist.Models;
+using Todolist.Factories;
+using Todolist.Services;
 
 namespace Todolist
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            _contentRootPath = env.ContentRootPath;
         }
 
-        private string _contentRootPath = "";
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {            
-            services.AddDbContext<Context>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection").Replace("%CONTENTROOTPATH%", _contentRootPath)));
-            services.AddDbContext<IdentityDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection").Replace("%CONTENTROOTPATH%", _contentRootPath)));
-
+            // services.AddDbContext<Context>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection").Replace("%CONTENTROOTPATH%", _contentRootPath)));
+            services.AddDbContext<IdentityDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection").Replace("%CONTENTROOTPATH%", Directory.GetCurrentDirectory())));
+            services.AddSingleton<IContextFactory, ContextFactory>();
+            services.AddScoped<ITasklistsService, TasklistsService>();
+            services.AddScoped<ITasksService, TasksService>();
+            services.AddAutoMapper(typeof(Startup));
+            services.AddHttpContextAccessor();
+            
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // In production, the Angular files will be served from this directory
@@ -45,26 +50,26 @@ namespace Todolist
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<IdentityDbContext>()
                 .AddDefaultTokenProviders();
-            
+
             services.AddAuthentication(options =>
                 {
                     options.DefaultSignOutScheme = IdentityConstants.ApplicationScheme;
                 })
                 .AddGoogle("Google", options =>
                 {
-                     options.ClientId = Configuration.GetSection("GoogleClientSecret")["auth:google:clientid"];
-                     options.ClientSecret = Configuration.GetSection("GoogleClientSecret")["auth:google:clientsecret"];
-                     options.CallbackPath = new Microsoft.AspNetCore.Http.PathString("/signin-google");
-                     options.Events = new OAuthEvents
-                     {
-                         OnRemoteFailure = (RemoteFailureContext context) =>
-                         {
+                    options.ClientId = Configuration.GetSection("GoogleClientSecret")["auth:google:clientid"];
+                    options.ClientSecret = Configuration.GetSection("GoogleClientSecret")["auth:google:clientsecret"];
+                    options.CallbackPath = new Microsoft.AspNetCore.Http.PathString("/signin-google");
+                    options.Events = new OAuthEvents
+                    {
+                        OnRemoteFailure = (RemoteFailureContext context) =>
+                        {
                             context.Response.Redirect("/");
                             context.HandleResponse();
                             return System.Threading.Tasks.Task.CompletedTask;
-                         }
-                     };
-                });   
+                        }
+                    };
+                });  
 
             services.AddCors(corsOptions =>
             {

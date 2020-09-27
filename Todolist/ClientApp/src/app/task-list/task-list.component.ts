@@ -11,55 +11,61 @@ import { PlatformLocation } from '@angular/common';
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.css']
 })
-export class TaskListComponent implements OnInit {  
+export class TaskListComponent implements OnInit {
 
   task: Task = new Task();
   tasks: Task[];
   tableMode: boolean = true;
   tasklist: Tasklist;
   tasklistid: number;
-  showHeader: boolean;
-  tasklisturl: string; 
-  readonly urlPath: string; 
+  isEmpty: boolean = true;
+  tasklisturl: string;
+  readonly urlPath: string;
 
-  constructor(private taskDataService: TaskDataService, private taskListDataService: TasklistDataService, private route: ActivatedRoute, private accountService: SecurityService, private location: PlatformLocation) {
+  constructor(private taskDataService: TaskDataService,
+              private taskListDataService: TasklistDataService,
+              private route: ActivatedRoute,
+              private accountService: SecurityService,
+              private location: PlatformLocation) {
     this.urlPath = (location as any).location.origin;
   }
 
-  ngOnInit() {    
+  ngOnInit() {
     this.route.paramMap.subscribe((params) => {
-      this.tasklistid = +params.get('id');
-      //console.log('Task list id: ' + this.tasklistid);
-      this.loadTasklist(this.tasklistid);
-      this.loadTasks(this.tasklistid);
-      this.tasklisturl = undefined;
+      if (params.get('id')) {
+        this.tasklistid = +params.get('id');
+        this.loadTasklist(this.tasklistid);
+        this.loadTasks(this.tasklistid);
+        this.tasklisturl = undefined;
+      }
     });
   }
 
   getUrl() {
-    this.taskListDataService.getTasklistUrl(this.tasklistid).subscribe(url => { this.tasklisturl = this.urlPath + '/tasklistbyurl/' + url; });
+    this.taskListDataService.getTasklistUrl(this.tasklistid)
+      .subscribe(x => {
+        this.tasklisturl = this.urlPath + '/tasklistbyurl/' + x['url'];
+      });
   }
 
-  checkUserAccess() {
-    this.accountService.getUserId().subscribe(userid => {
-      if (this.tasklist.user != userid) location.href = '/home';
-    });
-  }
-  
-  loadTasklist(tasklistid: number) {
-    this.taskListDataService.getTasklist(tasklistid)
-      .subscribe((data: Tasklist) => { this.tasklist = data; if (typeof data !== 'undefined') this.checkUserAccess(); });
+  loadTasklist(tasklistId: number) {
+    this.taskListDataService.getTasklist(tasklistId)
+      .subscribe((data: Tasklist) => {
+        this.tasklist = data;
+      });
   }
 
   loadTasks(tasklistid: number) {
     this.taskDataService.getTasks(tasklistid)
-      .subscribe((data: Task[]) => { this.tasks = data; this.showHeader = this.tasks.length > 0; });
+      .subscribe((data: Task[]) => {
+        this.tasks = data;
+        this.isEmpty = this.tasks.length === 0;
+      });
   }
-  
+
   save() {
     if (this.task.id == null) {
-      //this.task.tasklist = this.tasklist;      
-      this.task.tasklistid = this.tasklist.id;      
+      this.task.tasklistid = this.tasklist.id;
       this.taskDataService.createTask(this.task)
         .subscribe((data: Task) => this.tasks.push(data));
     } else {
@@ -68,19 +74,23 @@ export class TaskListComponent implements OnInit {
     }
     this.cancel();
   }
+
   editTask(t: Task) {
     this.task = t;
   }
+
   cancel() {
     this.task = new Task();
     this.tableMode = true;
   }
+
   delete(t: Task) {
     this.taskDataService.deleteTask(t.id)
       .subscribe(data => this.loadTasks(this.tasklistid));
   }
+
   add() {
     this.cancel();
     this.tableMode = false;
-  }  
+  }
 }

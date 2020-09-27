@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Todolist.Controllers
 {
+    [Route("/api/account")]
     public class AccountController : Controller
     {
         private readonly SignInManager<IdentityUser> _signInManager;
@@ -20,7 +21,7 @@ namespace Todolist.Controllers
             _userManager = userManager;
         }
 
-        [Route("/api/account/google-login")]
+        [Route("google-login")]
         [Microsoft.AspNetCore.Authorization.AllowAnonymous]
         public IActionResult SignInWithGoogle()
         {
@@ -28,7 +29,6 @@ namespace Todolist.Controllers
             return Challenge(authenticationProperties, "Google");
         }        
 
-        //[HttpGet("/signin-google")]
         public async Task<IActionResult> HandleExternalLogin()
         {
             var info = await _signInManager.GetExternalLoginInfoAsync();
@@ -57,7 +57,7 @@ namespace Todolist.Controllers
             return Redirect("/home");
         }
 
-        [Route("/account/logout")]
+        [HttpPost("logout")]
         [Authorize]
         public async Task<IActionResult> Logout()
         {
@@ -66,24 +66,24 @@ namespace Todolist.Controllers
         }
 
 
-        [Route("/api/account/name")]
+        [HttpGet("name")]
         [Authorize]
-        public IActionResult Name()
+        public IActionResult GetName()
         {
             var claimsPrincial = (ClaimsPrincipal)User;
             var givenName = claimsPrincial.FindFirst(ClaimTypes.GivenName).Value;
             return Ok(givenName);
         }
 
-        [Route("/api/account/userid")]
-        [Authorize]
-        public IActionResult Id()
-        {
-            return Ok(_userManager.GetUserId(User));
-        }
+        // [HttpGet("userid")]
+        // [Authorize]
+        // public IActionResult GetUserId()
+        // {
+        //     return Ok(_userManager.GetUserId(User));
+        // }
 
-        [Route("/api/account/isAuthenticated")]
-        public IActionResult IsAuthenticated()
+        [Route("isAuthenticated")]
+        public IActionResult GetIsAuthenticated()
         {
             return new ObjectResult(User.Identity.IsAuthenticated);
         }
