@@ -39,7 +39,7 @@ export class LoginService {
   constructor(@Inject(DOCUMENT) private document: Document, private httpClient: HttpClient, private accountService: SecurityService) { }
 
   login() {
-    this.document.location.href = '/api/account/google-login';
+    this.document.location.href = "http://localhost:5000/api/account/google-login";
     this.accountService.updateUserAuthenticationStatus().subscribe();
   }
 

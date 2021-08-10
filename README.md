@@ -1,19 +1,19 @@
 # angular_todolist
 task with angular and aspnet core
 
-приложение для создания пользовательских списков задач (todo lists):
+An application for creating user todo lists:
 
-•	Аутентификация пользователя должна выполняться через Google Account.
+•	Authentication via Google Account.
 
-•	Пользователь может создавать списки задач, переименовывать их и удалять.
+•	User can create, rename and delete todo lists.
 
-•	Пользователь может добавлять, переименовывать и удалять задачи из своих списках.
+•	User can create, rename and delete tasks in his own task lists.
 
-•	Пользователь может создать ссылку на список, по которой можно просмотреть список без аутентификации в системе.
+•	User can create link to the list, by which the list can be viewed without system authentication.
 
-•	Пользователь видит только свои списки, либо переданные ему по ссылке.
+•	User sees his own todo lists only, or those transferred to him by the link.
 
-•	Пользователь может помечать задачи внутри списков, как выполненные (в своих списках или в переданных ему по ссылке).
+•	User can mark tasks inside lists as completed (in his own lists or transferred to him by the link).
 
-•	Пользователь может скачать все свои списки в виде одного zip архива.
+•	User can download all his lists as zip archive.
 

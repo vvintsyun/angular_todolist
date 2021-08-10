@@ -14,10 +14,10 @@ namespace Todolist.Controllers
             _tasksService = tasksService;
         }
 
-        [HttpGet("byTasklistid")]
-        public IActionResult GetTasks([FromQuery] int tasklistid)
+        [HttpGet("byTaskListId")]
+        public IActionResult GetTasks([FromQuery] int taskListId)
         {
-            var result = _tasksService.GetTasklistTasksDto(tasklistid);
+            var result = _tasksService.GetTaskTasksByTaskList(taskListId);
 
             if (result == null)
             {
@@ -26,10 +26,10 @@ namespace Todolist.Controllers
             return Ok(result);
         }
         
-        [HttpGet("byTasklistUrl")]
-        public IActionResult GetTasks([FromQuery] string tasklistUrl)
+        [HttpGet("byTaskListUrl")]
+        public IActionResult GetTasks([FromQuery] string taskListUrl)
         {
-            var result = _tasksService.GetTasklistTasksByUrlDto(tasklistUrl);
+            var result = _tasksService.GetTaskListTasksByUrlDto(taskListUrl);
 
             if (result == null)
             {
@@ -46,7 +46,7 @@ namespace Todolist.Controllers
                 return BadRequest(ModelState);
             }
 
-            var task = _tasksService.GetUserTaskData(id);
+            var task = _tasksService.GetTask(id);
 
             if (task == null)
             {
@@ -68,9 +68,8 @@ namespace Todolist.Controllers
             {
                 return BadRequest();
             }
-
-            var task = _tasksService.GetTaskData(id);
-            _tasksService.UpdateTask(task, updateTaskDto);
+            
+            _tasksService.UpdateTask(updateTaskDto);
 
             return Ok();
         }
@@ -83,9 +82,9 @@ namespace Todolist.Controllers
                 return BadRequest(ModelState);
             }
 
-            var task = _tasksService.CreateTask(addTaskDto);
+            _tasksService.CreateTask(addTaskDto);
 
-            return CreatedAtAction("GetTask", new { id = task.Id }, task);
+            return Ok();
         }
 
         [HttpDelete("{id}")]
@@ -96,13 +95,7 @@ namespace Todolist.Controllers
                 return BadRequest(ModelState);
             }
 
-            var task = _tasksService.GetUserTaskData(id);
-            if (task == null)
-            {
-                return NotFound();
-            }
-
-            _tasksService.DeleteTask(task);
+            _tasksService.DeleteTask(id);
             return Ok();
         }
     }

@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -14,7 +16,6 @@ using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Todolist.Factories;
 using Todolist.Services;
 
 namespace Todolist
@@ -31,10 +32,10 @@ namespace Todolist
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {            
-            // services.AddDbContext<Context>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection").Replace("%CONTENTROOTPATH%", _contentRootPath)));
-            services.AddDbContext<IdentityDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection").Replace("%CONTENTROOTPATH%", Directory.GetCurrentDirectory())));
-            services.AddSingleton<IContextFactory, ContextFactory>();
-            services.AddScoped<ITasklistsService, TasklistsService>();
+            services.AddDbContext<Context>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection").Replace("%CONTENTROOTPATH%", Directory.GetCurrentDirectory())));
+            
+            services.AddScoped<ITaskListsService, TaskListsService>();
             services.AddScoped<ITasksService, TasksService>();
             services.AddAutoMapper(typeof(Startup));
             services.AddHttpContextAccessor();
@@ -48,7 +49,7 @@ namespace Todolist
             });
 
             services.AddIdentity<IdentityUser, IdentityRole>()
-                .AddEntityFrameworkStores<IdentityDbContext>()
+                .AddEntityFrameworkStores<Context>()
                 .AddDefaultTokenProviders();
 
             services.AddAuthentication(options =>
@@ -64,7 +65,7 @@ namespace Todolist
                     {
                         OnRemoteFailure = (RemoteFailureContext context) =>
                         {
-                            context.Response.Redirect("/");
+                            context.Response.Redirect("/api/account/denied");
                             context.HandleResponse();
                             return System.Threading.Tasks.Task.CompletedTask;
                         }
@@ -73,7 +74,11 @@ namespace Todolist
 
             services.AddCors(corsOptions =>
             {
-                corsOptions.AddPolicy("fully permissive", configurePolicy => configurePolicy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().AllowCredentials());
+                corsOptions.AddPolicy("fully permissive", configurePolicy => configurePolicy
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowAnyOrigin()
+                    .AllowCredentials());
             });
         }
 
@@ -91,6 +96,12 @@ namespace Todolist
             }            
             
             app.UseAuthentication();
+            app.UseCookiePolicy(new CookiePolicyOptions()
+            {
+                HttpOnly = HttpOnlyPolicy.Always,
+                Secure = CookieSecurePolicy.Always,
+                MinimumSameSitePolicy = SameSiteMode.Lax
+            });
             app.UseMvcWithDefaultRoute();
             app.UseCors("fully permissive");
             app.UseSpa(spa =>

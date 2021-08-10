@@ -1,15 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using Todolist.Dtos;
 
 namespace Todolist.Models
 {
-    public partial class Task
+    public class Task
     {
         public int Id { get; set; }
+        [MaxLength(100)]
+        [Required]
         public string Description { get; set; }
-        public int TasklistId { get; set; }
-        public bool Iscompleted { get; set; }
+        [Required]
+        public bool IsCompleted { get; set; }
 
-        public virtual Tasklist Tasklist { get; set; }
+        [Required]
+        public int TaskListId { get; set; }
+        public virtual TaskList TaskList { get; set; }
+
+        public Task(CreateTaskDto createDto)
+        {
+            Description = createDto.Description;
+            IsCompleted = createDto.IsCompleted;
+            TaskList = createDto.TaskList ?? throw new ArgumentException($"{nameof(createDto.TaskList)} is null");
+        }
+        
+        protected Task() {}
     }
 }

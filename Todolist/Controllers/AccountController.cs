@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Todolist.Controllers
 {
-    [Route("/api/account")]
     public class AccountController : Controller
     {
         private readonly SignInManager<IdentityUser> _signInManager;
@@ -21,7 +20,7 @@ namespace Todolist.Controllers
             _userManager = userManager;
         }
 
-        [Route("google-login")]
+        [Route("api/account/google-login")]
         [Microsoft.AspNetCore.Authorization.AllowAnonymous]
         public IActionResult SignInWithGoogle()
         {
@@ -66,12 +65,12 @@ namespace Todolist.Controllers
         }
 
 
-        [HttpGet("name")]
+        [HttpGet("api/account/name")]
         [Authorize]
         public IActionResult GetName()
         {
-            var claimsPrincial = (ClaimsPrincipal)User;
-            var givenName = claimsPrincial.FindFirst(ClaimTypes.GivenName).Value;
+            var claimsPrincipal = (ClaimsPrincipal)User;
+            var givenName = claimsPrincipal.FindFirst(ClaimTypes.GivenName).Value;
             return Ok(givenName);
         }
 
@@ -82,10 +81,16 @@ namespace Todolist.Controllers
         //     return Ok(_userManager.GetUserId(User));
         // }
 
-        [Route("isAuthenticated")]
+        [Route("api/account/isAuthenticated")]
         public IActionResult GetIsAuthenticated()
         {
             return new ObjectResult(User.Identity.IsAuthenticated);
+        }
+        
+        [Route("api/account/[action]")]
+        public IActionResult Denied()
+        {
+            return Content("Authorization error.");
         }
     }
 }

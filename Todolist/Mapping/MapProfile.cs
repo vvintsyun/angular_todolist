@@ -8,10 +8,14 @@ namespace Todolist.Mapping
     {
         public MapProfile()
         {
-            CreateMap<AddTasklistDto, Tasklist>();
+            CreateMap<AddTaskListDto, TaskList>();
             CreateMap<AddTaskDto, Task>();
-            CreateMap<UpdateTasklistDto, Tasklist>();
+            CreateMap<UpdateTaskListDto, TaskList>();
             CreateMap<UpdateTaskDto, Task>();
+            
+            CreateMap<Task, TaskDto>();
+            CreateMap<TaskList, TaskListDto>()
+                .ForMember(x => x.Tasks, x => x.MapFrom(xx => xx.Tasks));
         }
     }
 }

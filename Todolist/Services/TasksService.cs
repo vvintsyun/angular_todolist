@@ -1,77 +1,72 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Todolist.Dtos;
-using Todolist.Factories;
 using Todolist.Models;
 
 namespace Todolist.Services
 {
     public class TasksService : ITasksService
     {
-        private readonly IContextFactory _factory;
+        private readonly Context _dbContext;
         private readonly IMapper _mapper;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ITasklistsService _tasklistsService;
+        private readonly ITaskListsService _taskListsService;
+        private readonly ILogger<ITasksService> _logger;
 
-        public TasksService(IContextFactory contextFactory, IMapper mapper, UserManager<IdentityUser> userManager, 
-            IHttpContextAccessor httpContextAccessor, ITasklistsService tasklistsService)
+        public TasksService(IMapper mapper, UserManager<IdentityUser> userManager, Context dbContext,
+            IHttpContextAccessor httpContextAccessor, ITaskListsService taskListsService, ILogger<ITasksService> logger)
         {
-            _factory = contextFactory;
             _mapper = mapper;
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
-            _tasklistsService = tasklistsService;
+            _taskListsService = taskListsService;
+            _logger = logger;
+            _dbContext = dbContext;
         }
         
-        public List<TaskDto> GetTasklistTasksDto(int tasklistId)
+        public List<TaskDto> GetTaskTasksByTaskList(int taskListId)
         {
-            var tasklist = _tasklistsService.GetTasklistData(tasklistId);
+            //permission filters
+            
+            List<TaskDto> tasks;
+            try
+            {
+                tasks = _dbContext
+                    .Set<Task>()
+                    .Where(x => x.TaskListId == taskListId)
+                    .ProjectTo<TaskDto>()
+                    .ToList();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError($"{DateTime.Now:g}: {ex.Message}");
+                throw;
+            }
 
-            if (tasklist == null)
+            return tasks;
+        }
+        
+        public List<TaskDto> GetTaskListTasksByUrlDto(string taskListUrl)
+        {
+            var taskList = _taskListsService.GetTaskListByUrl(taskListUrl);
+
+            if (taskList == null)
             {
                 return null;
             }
             
-            return tasklist
-                .Tasks
-                .Select(x => new TaskDto
-                {
-                    Description = x.Description,
-                    Id = x.Id,
-                    Iscompleted = x.Iscompleted,
-                    TasklistId = x.TasklistId
-                })
-                .ToList();
+            return taskList.Tasks;
         }
         
-        public List<TaskDto> GetTasklistTasksByUrlDto(string tasklistUrl)
-        {
-            var tasklist = _tasklistsService.GetTasklistByUrl(tasklistUrl);
-
-            if (tasklist == null)
-            {
-                return null;
-            }
-            
-            return tasklist
-                .Tasks
-                .Select(x => new TaskDto
-                {
-                    Description = x.Description,
-                    Id = x.Id,
-                    Iscompleted = x.Iscompleted,
-                    TasklistId = x.TasklistId
-                })
-                .ToList();
-        }
-
-        public Task GetUserTaskData(int id)
-        {
+        public Task GetTask(int id)
+        {     
             var user = _httpContextAccessor.HttpContext.User;
             if (!user.Identity.IsAuthenticated)
             {
@@ -79,54 +74,87 @@ namespace Todolist.Services
             }
             
             var userId = _userManager.GetUserId(user);
-            using (var context = _factory.GetContext())
+
+            Task task;
+            try
             {
-                return context
-                    .Tasklists
-                    .Where(x => x.User == userId)
-                    .SelectMany(x => x.Tasks)
+                task = _dbContext
+                    .Set<Task>()
+                    .Where(x => x.TaskList.UserId == userId)
                     .FirstOrDefault(x => x.Id == id);
             }
-        }
-        
-        public Task GetTaskData(int id)
-        {            
-            using (var context = _factory.GetContext())
+            catch(Exception ex)
             {
-                return context
-                    .Tasks
-                    .FirstOrDefault(x => x.Id == id);
+                _logger.LogError($"{DateTime.Now:g}: {ex.Message}");
+                throw;
+            }
+
+            return task;
+        }
+
+        public void CreateTask(AddTaskDto newTask)
+        {
+            var taskList = _taskListsService.GetTaskList(newTask.TaskListId);
+            if (taskList == null)
+            {
+                throw new Exception("Task list doesn't exist.");
+            }
+
+            var createDto = new CreateTaskDto
+            {
+                Description = newTask.Description,
+                IsCompleted = newTask.IsCompleted,
+                TaskList = taskList
+            };
+            
+            var task = new Task(createDto);
+            try
+            {
+                _dbContext.Add(task);
+                _dbContext.SaveChanges();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError($"{DateTime.Now:g}: {ex.Message}");
+                throw;
             }
         }
 
-        public Task CreateTask(AddTaskDto newTask)
+        public void UpdateTask(UpdateTaskDto updatedTask)
         {
-            var task = _mapper.Map<Task>(newTask);
-            using (var context = _factory.GetContext())
-            {
-                context.Tasks.Add(task);
-                context.SaveChanges();
-
-                return task;
-            }
-        }
-
-        public void UpdateTask(Task task, UpdateTaskDto updatedTask)
-        {
+            var task = GetTask(updatedTask.Id);
             _mapper.Map(updatedTask, task);
-            using (var context = _factory.GetContext())
+            
+            try
             {
-                context.Tasks.Update(task);
-                context.SaveChanges();
+                _dbContext.Update(task);
+                _dbContext.SaveChanges();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError($"{DateTime.Now:g}: {ex.Message}");
+                throw;
             }
         }
         
-        public void DeleteTask(Task task)
+        public void DeleteTask(int id)
         {
-            using (var context = _factory.GetContext())
+            var task = GetTask(id);
+
+            if (task == null)
             {
-                context.Tasks.Remove(task);
-                context.SaveChanges();
+                throw new Exception("Task doesn't exist.");
+            }
+            
+            try
+            {
+                _dbContext.Remove(task);
+                _dbContext.SaveChanges();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError($"{DateTime.Now:g}: {ex.Message}");
+                throw;
             }
         }
     }
