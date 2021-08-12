@@ -8,9 +8,10 @@ namespace Todolist.Services
     {
         List<TaskDto> GetTaskTasksByTaskList(int taskListId);
         List<TaskDto> GetTaskListTasksByUrlDto(string taskListUrl);
-        Task GetTask(int id);
+        Task GetTask(int id, bool allowAnonymous = false);
         void CreateTask(AddTaskDto newTask);
         void UpdateTask(UpdateTaskDto updatedTask);
+        void UpdateCompleted(UpdateTaskCompletedDto updatedCompleted);
         void DeleteTask(int id);
     }
 }

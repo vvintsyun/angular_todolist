@@ -1,43 +1,39 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Tasklist } from '../tasklist';
-import { TasklistDataService } from '../data.service';
+import {Component, OnInit, OnDestroy, Input} from '@angular/core';
+import { TaskList } from '../tasklist';
+import { TaskListDataService } from '../data.service';
 import { Subscription } from 'rxjs';
 import { SecurityService, LoginService } from '../login.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-user-lists',
   templateUrl: './user-lists.component.html',
-  providers: [TasklistDataService],
+  providers: [TaskListDataService],
   styleUrls: ['./user-lists.component.css']
 })
 export class UserListsComponent implements OnInit, OnDestroy {
-  isExpanded = false;
-  tasklist: Tasklist = new Tasklist();
-  tasklists: Tasklist[];
+  @Input() currentTaskListId: number;
+  editableTaskList: TaskList = new TaskList();
+  taskLists: TaskList[];
   tableMode: boolean = true;
 
   isUserAuthenticated = false;
   subscription: Subscription;
   userName: string;
 
-  collapse() {
-    this.isExpanded = false;
-  }
-
-  toggle() {
-    this.isExpanded = !this.isExpanded;
-  }
-
-  constructor(private accountService: SecurityService, private loginService: LoginService, private dataService: TasklistDataService) { }
+  constructor(private accountService: SecurityService,
+              private loginService: LoginService,
+              private router: Router,
+              private dataService: TaskListDataService) { }
 
   ngOnInit() {
-    this.subscription = this.accountService.isUserAuthenticated.subscribe(isAuthenticated => {
+    this.subscription = this.accountService.isUserAuthenticated$.subscribe(isAuthenticated => {
       this.isUserAuthenticated = isAuthenticated;
       if (this.isUserAuthenticated) {
         this.accountService.getUserName().subscribe(theName => {
           this.userName = theName;
         });
-        this.loadTasklists();
+        this.loadTaskLists();
       }
     });
   }
@@ -50,41 +46,51 @@ export class UserListsComponent implements OnInit, OnDestroy {
     this.loginService.logout();
   }
 
-  downloadzip() {
-    this.dataService.downloadlists();
+  downloadZip() {
+    this.dataService.downloadZip();
   }
 
-  loadTasklists() {
-    this.dataService.getAllTasklists()
-      .subscribe((data: Tasklist[]) => this.tasklists = data);
+  loadTaskLists() {
+    this.dataService.getAllTaskLists()
+      .subscribe((data: TaskList[]) => this.taskLists = data);
   }
 
   save() {
-    const name = this.tasklist.name;
-    if (this.tasklist.id == null) {
-      this.dataService.createTasklist(this.tasklist)
-        .subscribe((data: Tasklist) => this.tasklists.push(data));
+    const name = this.editableTaskList.name;
+    if (!name) {
+      return;
+    }
+    if (this.editableTaskList.id == null) {
+      this.dataService.createTaskList(this.editableTaskList)
+        .subscribe(_ => this.loadTaskLists());
     } else {
-      this.dataService.updateTasklist(this.tasklist)
-        .subscribe(data => this.loadTasklists());
+      this.dataService.updateTaskList(this.editableTaskList)
+        .subscribe(_ => this.loadTaskLists());
     }
     this.cancel();
   }
 
-  editTasklist(tl: Tasklist) {
-    this.tasklist = tl;
+  editTaskList(tl: TaskList) {
+    this.editableTaskList = Object.assign({}, tl);
     return false;
   }
 
   cancel() {
-    this.tasklist = new Tasklist();
+    this.editableTaskList = new TaskList();
     this.tableMode = true;
   }
 
-  delete(event, tl: Tasklist) {
+  delete(event, tl: TaskList) {
     event.stopPropagation();
-    this.dataService.deleteTasklist(tl.id)
-      .subscribe(data => this.loadTasklists());
+    this.dataService.deleteTaskList(tl.id)
+      .subscribe(_ => {
+        if (tl.id === this.currentTaskListId) {
+          this.router.navigate(['/home']);
+        }
+        else {
+          this.loadTaskLists();
+        }
+      });
     return false;
   }
 

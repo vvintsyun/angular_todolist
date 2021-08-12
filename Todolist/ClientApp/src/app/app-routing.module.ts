@@ -1,20 +1,20 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {AppComponent} from './app.component';
 import {TaskListComponent} from './task-list/task-list.component';
 import { HomeComponent } from './home/home.component';
-import { TaskListUrlComponent } from './task-list/task-list-url.component';
+import {AuthGuard} from './can-activate-guard';
 
 const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
-  { path: 'home', component: TaskListComponent, pathMatch: 'full' },
-  { path: 'tasklist/:id', component: TaskListComponent },
-  { path: 'tasklistbyurl/:url', component: TaskListUrlComponent },
+  { path: 'home', component: TaskListComponent, pathMatch: 'full', canActivate: [AuthGuard] },
+  { path: 'tasklist/:id', component: TaskListComponent, canActivate: [AuthGuard] },
+  { path: 'tasklistbyurl/:url', component: TaskListComponent },
 ];
 
 @NgModule({
   imports: [RouterModule, RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
+  providers: [AuthGuard]
 })
 export class AppRoutingModule {
 }

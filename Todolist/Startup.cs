@@ -40,6 +40,14 @@ namespace Todolist
             services.AddAutoMapper(typeof(Startup));
             services.AddHttpContextAccessor();
             
+            services.AddCors(corsOptions =>
+            {
+                corsOptions.AddPolicy("fully permissive", configurePolicy => configurePolicy
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials()
+                    .AllowAnyOrigin());
+            });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // In production, the Angular files will be served from this directory
@@ -70,16 +78,7 @@ namespace Todolist
                             return System.Threading.Tasks.Task.CompletedTask;
                         }
                     };
-                });  
-
-            services.AddCors(corsOptions =>
-            {
-                corsOptions.AddPolicy("fully permissive", configurePolicy => configurePolicy
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowAnyOrigin()
-                    .AllowCredentials());
-            });
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -102,8 +101,8 @@ namespace Todolist
                 Secure = CookieSecurePolicy.Always,
                 MinimumSameSitePolicy = SameSiteMode.Lax
             });
-            app.UseMvcWithDefaultRoute();
             app.UseCors("fully permissive");
+            app.UseMvcWithDefaultRoute();
             app.UseSpa(spa =>
             {
                 // To learn more about options for serving an Angular SPA from ASP.NET Core,

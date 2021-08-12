@@ -37,7 +37,8 @@ namespace Todolist.Controllers
         }
 
         [HttpGet("TaskListByUrl/{url}")]
-        public IActionResult GetTaskListIdByUrl(string url)
+        [AllowAnonymous]
+        public IActionResult GetTaskListIdByUrl([FromRoute] string url)
         {
             var taskList = _taskListsService.GetTaskListByUrl(url);
 
@@ -55,7 +56,7 @@ namespace Todolist.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetTaskList(int id)
+        public IActionResult GetTaskList([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
@@ -151,17 +152,17 @@ namespace Todolist.Controllers
 
         private string GetTaskListContent(TaskListDto taskList)
         {
-            string result = "";
+            StringBuilder result = new StringBuilder();
             var tasks = taskList
                 .Tasks
                 .ToArray();
-            //rewrite mapping
+            
             foreach (var task in tasks)
             {
                 string isCompleted = task.IsCompleted ? "[Completed]" : "[Not Completed]";
-                result += $"{task.Description} {isCompleted}" + Environment.NewLine;
+                result.Append($"{task.Description} {isCompleted}" + Environment.NewLine);
             }
-            return result;
+            return result.ToString();
         }
     }
 }

@@ -7,16 +7,16 @@ namespace Todolist.Models
 {
     public class Task
     {
-        public int Id { get; set; }
+        public int Id { get; protected set; }
         [MaxLength(100)]
         [Required]
-        public string Description { get; set; }
+        public string Description { get; protected set; }
         [Required]
         public bool IsCompleted { get; set; }
 
         [Required]
-        public int TaskListId { get; set; }
-        public virtual TaskList TaskList { get; set; }
+        public int TaskListId { get; protected set; }
+        public virtual TaskList TaskList { get; protected set; }
 
         public Task(CreateTaskDto createDto)
         {

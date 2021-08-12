@@ -2,20 +2,25 @@
     <div class='navbar navbar-inverse'>
       <div class='navbar-header'>
         <div *ngIf="isUserAuthenticated">
-          <h3 style="color: white" *ngIf="userName">Hello {{userName}}</h3>
-          <button class="btn btn-dark btn-lg" style="margin-right: 5px" (click)="downloadzip()">Download lists</button>
+          <h3 style="color: white" *ngIf="userName">Hello, {{userName}}.</h3>
+          <button class="btn btn-dark btn-lg" style="margin-right: 5px" (click)="downloadZip()">Download lists</button>
           <button class="btn btn-dark btn-lg" (click)="logout()">Logout</button>
         </div>
       </div>
         <div class='clearfix'></div>
-        <div class='navbar-collapse collapse' [ngClass]='{ "in": isExpanded }'>
+        <div class='navbar-collapse collapse'>
           <ul class='nav navbar-nav'>
-            <li *ngFor="let tl of tasklists" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
-              <ng-template [ngIf]="tasklist?.id != tl.id" [ngIfElse]="edit">
-                <a [routerLink]='["/tasklist",tl?.id]' [name]="tl?.name" (click)='collapse()'>
-                  <span class='glyphicon glyphicon-th-list'></span> {{tl?.name}}
-                  <span class="glyphicon glyphicon-pencil" title="Rename" (click)="editTasklist(tl)"></span>
-                  <span class="glyphicon glyphicon-trash" title="Delete" (click)="delete($event, tl)"></span>
+            <li *ngFor="let tl of taskLists" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
+              <ng-template [ngIf]="editableTaskList?.id != tl.id" [ngIfElse]="edit">
+                <a [routerLink]='["/tasklist", tl?.id]' [name]="tl?.name" class="tasklist-item">
+                  <div class="tasklist-title">
+                    <span class='glyphicon glyphicon-th-list'></span>
+                    <div class="tasklist-name">{{tl?.name}}</div>
+                  </div>
+                  <div>
+                    <span class="glyphicon glyphicon-pencil" title="Rename" (click)="editTaskList(tl)"></span>
+                    <span class="glyphicon glyphicon-trash" title="Delete" (click)="delete($event, tl)"></span>
+                  </div>
                 </a>
               </ng-template>
             </li>
@@ -24,14 +29,14 @@
             </li>
             <ng-template #create>
               <li>
-                <input type="text" [(ngModel)]="tasklist.name" class="form-control" />
+                <input type="text" [(ngModel)]="editableTaskList.name" class="form-control" required maxlength="50"/>
                 <span title="Save" (click)="save()" class="glyphicon glyphicon-ok white-item"></span>
                 <span title="Cancel" (click)="cancel()" class="glyphicon glyphicon-remove white-item"></span>
               </li>
             </ng-template>
             <ng-template #edit>
               <li>
-                <input type="text" [(ngModel)]="tasklist.name" class="form-control" />
+                <input type="text" [(ngModel)]="editableTaskList.name" class="form-control" required maxlength="50"/>
                 <span title="Save" (click)="save()" class="glyphicon glyphicon-ok white-item"></span>
                 <span title="Cancel" (click)="cancel()" class="glyphicon glyphicon-remove white-item"></span>
               </li>

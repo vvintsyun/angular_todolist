@@ -56,12 +56,12 @@ namespace Todolist.Controllers
             return Redirect("/home");
         }
 
-        [HttpPost("logout")]
+        [HttpPost("api/account/logout")]
         [Authorize]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return Redirect("/");
+            return Ok();
         }
 
 
@@ -73,13 +73,6 @@ namespace Todolist.Controllers
             var givenName = claimsPrincipal.FindFirst(ClaimTypes.GivenName).Value;
             return Ok(givenName);
         }
-
-        // [HttpGet("userid")]
-        // [Authorize]
-        // public IActionResult GetUserId()
-        // {
-        //     return Ok(_userManager.GetUserId(User));
-        // }
 
         [Route("api/account/isAuthenticated")]
         public IActionResult GetIsAuthenticated()

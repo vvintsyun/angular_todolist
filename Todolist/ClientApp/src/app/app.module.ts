@@ -9,7 +9,6 @@ import {AppRoutingModule} from './app-routing.module';
 import {CommonModule} from '@angular/common';
 import {TaskListComponent} from './task-list/task-list.component';
 import { HomeComponent } from './home/home.component';
-import { TaskListUrlComponent } from './task-list/task-list-url.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +16,6 @@ import { TaskListUrlComponent } from './task-list/task-list-url.component';
     UserListsComponent,
     TaskListComponent,
     HomeComponent,
-    TaskListUrlComponent
   ],
   imports: [
     BrowserModule,

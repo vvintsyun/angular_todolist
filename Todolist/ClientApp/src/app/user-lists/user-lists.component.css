@@ -61,3 +61,17 @@ li.link-active a:focus {
 .white-item {
   color: white;
 }
+
+.tasklist-item {
+  display: flex;
+  justify-content: space-between;
+}
+
+.tasklist-title {
+  max-width: 85%;
+  overflow: hidden;
+}
+
+.tasklist-name {
+  display: inline-block;
+}

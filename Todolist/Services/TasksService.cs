@@ -65,28 +65,45 @@ namespace Todolist.Services
             return taskList.Tasks;
         }
         
-        public Task GetTask(int id)
-        {     
-            var user = _httpContextAccessor.HttpContext.User;
-            if (!user.Identity.IsAuthenticated)
-            {
-                return null;
-            }
-            
-            var userId = _userManager.GetUserId(user);
-
+        public Task GetTask(int id, bool allowForAnonymous = false)
+        {
             Task task;
-            try
+            if (allowForAnonymous)
             {
-                task = _dbContext
-                    .Set<Task>()
-                    .Where(x => x.TaskList.UserId == userId)
-                    .FirstOrDefault(x => x.Id == id);
+                try
+                {
+                    task = _dbContext
+                        .Set<Task>()
+                        .FirstOrDefault(x => x.Id == id);
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogError($"{DateTime.Now:g}: {ex.Message}");
+                    throw;
+                }
             }
-            catch(Exception ex)
+            else
             {
-                _logger.LogError($"{DateTime.Now:g}: {ex.Message}");
-                throw;
+                var user = _httpContextAccessor.HttpContext.User;
+                if (!user.Identity.IsAuthenticated)
+                {
+                    return null;
+                }
+            
+                var userId = _userManager.GetUserId(user);
+
+                try
+                {
+                    task = _dbContext
+                        .Set<Task>()
+                        .Where(x => x.TaskList.UserId == userId)
+                        .FirstOrDefault(x => x.Id == id);
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogError($"{DateTime.Now:g}: {ex.Message}");
+                    throw;
+                }
             }
 
             return task;
@@ -149,6 +166,23 @@ namespace Todolist.Services
             try
             {
                 _dbContext.Remove(task);
+                _dbContext.SaveChanges();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError($"{DateTime.Now:g}: {ex.Message}");
+                throw;
+            }
+        }
+
+        public void UpdateCompleted(UpdateTaskCompletedDto updatedCompleted)
+        {
+            var task = GetTask(updatedCompleted.Id, true);
+            task.IsCompleted = updatedCompleted.IsCompleted;
+            
+            try
+            {
+                _dbContext.Update(task);
                 _dbContext.SaveChanges();
             }
             catch(Exception ex)

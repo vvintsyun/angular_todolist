@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { LoginService, SecurityService } from '../login.service';
 import { Subscription } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -9,15 +10,17 @@ import { HttpClient } from '@angular/common/http';
 })
 export class HomeComponent implements OnInit {
   isUserAuthenticated = false;
-  subscription: Subscription;
 
-  constructor(private httpClient: HttpClient, private accountService: SecurityService, private loginService: LoginService) { }
+  constructor(private httpClient: HttpClient,
+              private accountService: SecurityService,
+              private loginService: LoginService,
+              private router: Router) { }
 
   ngOnInit() {
-    this.subscription = this.accountService.isUserAuthenticated.subscribe(isAuthenticated => {
+    this.accountService.isUserAuthenticated$.subscribe(isAuthenticated => {
       this.isUserAuthenticated = isAuthenticated;
       if (this.isUserAuthenticated) {
-        location.href = '/home';
+        this.router.navigate(['/home']);
       }
     });
   }

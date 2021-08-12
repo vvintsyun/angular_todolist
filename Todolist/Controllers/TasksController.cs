@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Todolist.Dtos;
 using Todolist.Services;
 
 namespace Todolist.Controllers
 {
     [Route("api/tasks")]
+    [Authorize]
     public class TasksController : ControllerBase
     {
         private readonly ITasksService _tasksService;
@@ -14,8 +16,8 @@ namespace Todolist.Controllers
             _tasksService = tasksService;
         }
 
-        [HttpGet("byTaskListId")]
-        public IActionResult GetTasks([FromQuery] int taskListId)
+        [HttpGet("byTaskListId/{taskListId}")]
+        public IActionResult GetTasks([FromRoute] int taskListId)
         {
             var result = _tasksService.GetTaskTasksByTaskList(taskListId);
 
@@ -26,8 +28,9 @@ namespace Todolist.Controllers
             return Ok(result);
         }
         
-        [HttpGet("byTaskListUrl")]
-        public IActionResult GetTasks([FromQuery] string taskListUrl)
+        [HttpGet("byTaskListUrl/{taskListUrl}")]
+        [AllowAnonymous]
+        public IActionResult GetTasks([FromRoute] string taskListUrl)
         {
             var result = _tasksService.GetTaskListTasksByUrlDto(taskListUrl);
 
@@ -70,6 +73,20 @@ namespace Todolist.Controllers
             }
             
             _tasksService.UpdateTask(updateTaskDto);
+
+            return Ok();
+        }
+        
+        [HttpPut("updateCompleted")]
+        [AllowAnonymous]
+        public IActionResult UpdateCompleted([FromBody] UpdateTaskCompletedDto updateTaskCompletedDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            
+            _tasksService.UpdateCompleted(updateTaskCompletedDto);
 
             return Ok();
         }

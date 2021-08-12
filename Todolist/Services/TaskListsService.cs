@@ -41,14 +41,14 @@ namespace Todolist.Services
             }
             
             var userId = _userManager.GetUserId(user);
-            List<TaskListDto> taskLists;
+            TaskListDto[] taskLists;
             try
             {
                 taskLists = _dbContext
                     .Set<TaskList>()
                     .Where(tl => tl.UserId == userId)
                     .ProjectTo<TaskListDto>()
-                    .ToList();
+                    .ToArray();
             }
             catch(Exception ex)
             {
@@ -129,7 +129,6 @@ namespace Todolist.Services
             }
         }
 
-        //[Authorize] ????
         public async Task CreateTaskList(AddTaskListDto newTaskList)
         {
             var user = _httpContextAccessor.HttpContext.User;
