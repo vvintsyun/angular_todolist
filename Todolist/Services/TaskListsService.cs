@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Todolist.Dtos;
 using Todolist.Extensions;
@@ -32,7 +34,7 @@ namespace Todolist.Services
             _logger = logger;
         }
         
-        public IEnumerable<TaskListDto> GetUserTaskLists()
+        public async Task<IEnumerable<TaskListDto>> GetUserTaskLists()
         {
             var user = _httpContextAccessor.HttpContext.User;
             if (!user.Identity.IsAuthenticated)
@@ -44,11 +46,11 @@ namespace Todolist.Services
             TaskListDto[] taskLists;
             try
             {
-                taskLists = _dbContext
+                taskLists = await _dbContext
                     .Set<TaskList>()
                     .Where(tl => tl.UserId == userId)
                     .ProjectTo<TaskListDto>()
-                    .ToArray();
+                    .ToArrayAsync();
             }
             catch(Exception ex)
             {
@@ -59,16 +61,16 @@ namespace Todolist.Services
             return taskLists;
         }
 
-        public TaskListDto GetTaskListByUrl(string url)
+        public async Task<TaskListDto> GetTaskListByUrl(string url)
         {
             var id = url.DecodeLongByHashIds();
             TaskListDto taskList;
             try
             {
-                taskList = _dbContext
+                taskList = await _dbContext
                     .Set<TaskList>()
                     .ProjectTo<TaskListDto>()
-                    .FirstOrDefault(tl => tl.Id == id);
+                    .FirstOrDefaultAsync(tl => tl.Id == id);
             }
             catch(Exception ex)
             {
@@ -79,7 +81,7 @@ namespace Todolist.Services
             return taskList;
         }
 
-        public TaskListDto GetTaskListData(int id)
+        public async Task<TaskListDto> GetTaskListData(int id)
         {
             var user = _httpContextAccessor.HttpContext.User;
             if (!user.Identity.IsAuthenticated)
@@ -92,11 +94,11 @@ namespace Todolist.Services
             TaskListDto taskList;
             try
             {
-                taskList = _dbContext
+                taskList = await _dbContext
                     .Set<TaskList>()
                     .Where(x => x.UserId == userId)
                     .ProjectTo<TaskListDto>()
-                    .FirstOrDefault(x => x.Id == id);
+                    .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch(Exception ex)
             {
@@ -107,9 +109,9 @@ namespace Todolist.Services
             return taskList;
         }
 
-        public void UpdateTaskList(UpdateTaskListDto updatedTaskList)
+        public async Task UpdateTaskList(UpdateTaskListDto updatedTaskList)
         {
-            var taskList = GetTaskList(updatedTaskList.Id);
+            var taskList = await GetTaskList(updatedTaskList.Id);
             if (taskList == null)
             {
                 throw new Exception("Task list doesn't exist.");
@@ -120,7 +122,7 @@ namespace Todolist.Services
             try
             {
                 _dbContext.Update(taskList);
-                _dbContext.SaveChanges();
+                await _dbContext.SaveChangesAsync();
             }
             catch(Exception ex)
             {
@@ -151,11 +153,11 @@ namespace Todolist.Services
             }
         }
 
-        public void DeleteTaskList(int id)
+        public async Task DeleteTaskList(int id)
         {
             try
             {
-                var taskList = GetTaskList(id);
+                var taskList = await GetTaskList(id);
 
                 if (taskList == null)
                 {
@@ -163,7 +165,7 @@ namespace Todolist.Services
                 }
                 
                 _dbContext.Remove(taskList);
-                _dbContext.SaveChanges();
+                await _dbContext.SaveChangesAsync();
             }
             catch(Exception ex)
             {
@@ -172,14 +174,14 @@ namespace Todolist.Services
             }
         }
 
-        public string GetTaskListUrl(int id)
+        public async Task<string> GetTaskListUrl(int id)
         {
-            var taskList = GetTaskList(id);
+            var taskList = await GetTaskList(id);
 
             return taskList?.Id.EncryptId();
         }
         
-        public TaskList GetTaskList(int id)
+        public async Task<TaskList> GetTaskList(int id)
         {
             var user = _httpContextAccessor.HttpContext.User;
             if (!user.Identity.IsAuthenticated)
@@ -192,10 +194,10 @@ namespace Todolist.Services
             TaskList taskList;
             try
             {
-                taskList = _dbContext
+                taskList = await _dbContext
                     .Set<TaskList>()
                     .Where(x => x.UserId == userId)
-                    .FirstOrDefault(x => x.Id == id);
+                    .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch(Exception ex)
             {

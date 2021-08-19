@@ -5,7 +5,7 @@
     </div>
     <div class='col-sm-9 body-content' *ngIf="this.taskListId || this.taskListUrl">
       <h1>{{taskList?.name}}</h1>
-      <div *ngIf="this.taskListId">
+      <div *ngIf="this.taskListId && this.taskList">
         <input type="button" value="New task" class="btn btn-default margin-5" (click)="add()" />
         <input type="button" value="Get url" class="btn btn-default margin-5" (click)="getUrl()" />
         <input class="margin-5" type="text" value="{{generatedTaskListUrl}}" *ngIf="this.generatedTaskListUrl" style="width:320px"/>

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Todolist.Dtos;
 using Todolist.Models;
 using Task = System.Threading.Tasks.Task;
@@ -7,13 +8,13 @@ namespace Todolist.Services
 {
     public interface ITaskListsService
     {
-        IEnumerable<TaskListDto> GetUserTaskLists();
-        TaskListDto GetTaskListByUrl(string url);
-        TaskListDto GetTaskListData(int id);
-        TaskList GetTaskList(int id);
+        Task<IEnumerable<TaskListDto>> GetUserTaskLists();
+        Task<TaskListDto> GetTaskListByUrl(string url);
+        Task<TaskListDto> GetTaskListData(int id);
+        Task<TaskList> GetTaskList(int id);
         Task CreateTaskList(AddTaskListDto newTaskList);
-        void DeleteTaskList(int id);
-        void UpdateTaskList(UpdateTaskListDto updatedTaskList);
-        string GetTaskListUrl(int id);
+        Task DeleteTaskList(int id);
+        Task UpdateTaskList(UpdateTaskListDto updatedTaskList);
+        Task<string> GetTaskListUrl(int id);
     }
 }

@@ -1,5 +1,4 @@
-# angular_todolist
-task with angular and aspnet core
+To run: use localhost:5000
 
 An application for creating user todo lists:
 

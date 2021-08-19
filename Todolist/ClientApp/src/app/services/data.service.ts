@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Task } from './task';
-import { TaskList } from './taskList';
-import {UpdateTaskCompletedDto} from './task-list/task-list.component';
+import { Task } from '../task';
+import { TaskList } from '../tasklist';
+import {UpdateTaskCompletedDto} from '../task-list/task-list.component';
 
 @Injectable()
 export class TaskDataService {

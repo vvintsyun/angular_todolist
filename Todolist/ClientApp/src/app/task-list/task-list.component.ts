@@ -1,12 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import {Task} from '../task';
-import {TaskDataService, TaskListDataService} from '../data.service';
+import {TaskDataService, TaskListDataService} from '../services/data.service';
 import {ActivatedRoute} from '@angular/router';
-import { SecurityService } from '../login.service';
+import { SecurityService } from '../services/login.service';
 import { TaskList } from '../taskList';
 import { PlatformLocation } from '@angular/common';
-import {Subscription} from 'rxjs';
-import {switchMap} from 'rxjs/operators';
+import {of, Subscription, throwError, zip} from 'rxjs';
+import {catchError, switchMap} from 'rxjs/operators';
+import {NotificationService} from '../services/error-notification.service';
 
 @Component({
   selector: 'app-task-list',
@@ -25,9 +26,11 @@ export class TaskListComponent implements OnInit, OnDestroy {
   generatedTaskListUrl: string;
   readonly urlPath: string;
   taskListUrl: string;
+  id: number;
 
   constructor(private taskDataService: TaskDataService,
               private taskListDataService: TaskListDataService,
+              private notification: NotificationService,
               private route: ActivatedRoute,
               private accountService: SecurityService,
               private location: PlatformLocation) {
@@ -35,26 +38,30 @@ export class TaskListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    //fix incorrect (not existed/not permitted) id behaviour
-    this.subscription = this.route.paramMap.subscribe((params) => {
-      const id = params.get('id');
-      if (id) {
-        this.taskListId = +id;
-        this.loadTaskList(this.taskListId)
-          .subscribe((data: TaskList) => this.loadTaskListSubscribtion(data));
-        this.loadTasks(this.taskListId)
-          .subscribe((data: Task[]) => this.loadTasksSubscribtion(data));
-        this.generatedTaskListUrl = undefined;
-      }
-      const url = params.get('url');
-      if (url) {
-        this.taskListUrl = url;
-        this.loadTaskListByUrl(this.taskListUrl)
-          .subscribe((data: TaskList) => this.loadTaskListSubscribtion(data));
-        this.loadTasksByUrl(this.taskListUrl)
-          .subscribe((data: Task[]) => this.loadTasksSubscribtion(data));
-      }
-    });
+    this.subscription = this.route.paramMap.pipe(
+      switchMap(params => {
+        this.taskListId = +params.get('id');
+        if (this.taskListId) {
+          this.generatedTaskListUrl = undefined;
+          return zip(this.loadTaskList(this.taskListId), this.loadTasks(this.taskListId))
+            .pipe(catchError(() => {
+              this.notification.showError('Error on getting data was occured.');
+              return of();
+            }));
+        }
+        this.taskListUrl = params.get('url');
+        if (this.taskListUrl) {
+          return zip(this.loadTaskListByUrl(this.taskListUrl), this.loadTasksByUrl(this.taskListUrl))
+            .pipe(catchError(() => {
+              this.notification.showError('Error on getting data was occured.');
+              return of();
+            }));
+        }
+      }))
+      .subscribe(data => {
+        this.loadTaskListSubscription(data[0]);
+        this.loadTasksSubscription(data[1]);
+      });
   }
 
   ngOnDestroy() {
@@ -65,7 +72,10 @@ export class TaskListComponent implements OnInit, OnDestroy {
     this.taskListDataService.getTaskListUrl(this.taskListId)
       .subscribe(x => {
         this.generatedTaskListUrl = this.urlPath + '/tasklistbyurl/' + x['url'];
-      });
+      },
+      (_ => {
+        this.notification.showError('Error on getting task list was occured.');
+      }));
   }
 
   loadTaskList(taskListId: number) {
@@ -84,12 +94,12 @@ export class TaskListComponent implements OnInit, OnDestroy {
     return this.taskDataService.getTasksByUrl(taskListUrl);
   }
 
-  loadTasksSubscribtion(data: Task[]) {
+  loadTasksSubscription(data) {
     this.tasks = data;
     this.isEmpty = this.tasks.length === 0;
   }
 
-  loadTaskListSubscribtion(data: TaskList) {
+  loadTaskListSubscription(data: TaskList) {
     this.taskList = data;
   }
 
@@ -97,24 +107,45 @@ export class TaskListComponent implements OnInit, OnDestroy {
     task.isCompleted = !task.isCompleted;
     const updateDto = new UpdateTaskCompletedDto(task.id, task.isCompleted);
     this.taskDataService.updateCompleted(updateDto)
-      .pipe(switchMap(_ => {
-        return this.taskListId
-          ? this.loadTasks(this.taskListId)
-          : this.loadTasksByUrl(this.taskListUrl);
-      }))
-      .subscribe((data: Task[]) => this.loadTasksSubscribtion(data));
+      .pipe(catchError(err => {
+          this.notification.showError('Error on updating task was occured.');
+          return of();
+        }),
+        switchMap(_ => {
+          return this.taskListId
+            ? this.loadTasks(this.taskListId)
+            : this.loadTasksByUrl(this.taskListUrl);
+        }))
+      .subscribe((data: Task[]) => this.loadTasksSubscription(data),
+        (_ => {
+          this.notification.showError('Error on getting tasks was occured.');
+        }));
   }
 
   save() {
     if (this.editableTask.id == null) {
       this.editableTask.taskListId = this.taskList.id;
       this.taskDataService.createTask(this.editableTask)
-        .pipe(switchMap(_ => this.loadTasks(this.taskListId)))
-        .subscribe((data: Task[]) => this.loadTasksSubscribtion(data));
+        .pipe(catchError(err => {
+            this.notification.showError('Error on creating task was occured.');
+            return of();
+          }),
+          switchMap(_ => this.loadTasks(this.taskListId)))
+        .subscribe((data: Task[]) => this.loadTasksSubscription(data),
+          (_ => {
+            this.notification.showError('Error on getting tasks was occured.');
+          }));
     } else {
       this.taskDataService.updateTask(this.editableTask)
-        .pipe(switchMap(_ => this.loadTasks(this.taskListId)))
-        .subscribe((data: Task[]) => this.loadTasksSubscribtion(data));
+        .pipe(catchError(err => {
+            this.notification.showError('Error on updating task was occured.');
+            return of();
+          }),
+          switchMap(_ => this.loadTasks(this.taskListId)))
+        .subscribe((data: Task[]) => this.loadTasksSubscription(data),
+          (_ => {
+            this.notification.showError('Error on getting tasks was occured.');
+          }));
     }
     this.cancel();
   }
@@ -130,8 +161,15 @@ export class TaskListComponent implements OnInit, OnDestroy {
 
   delete(t: Task) {
     this.taskDataService.deleteTask(t.id)
-      .pipe(switchMap(_ => this.loadTasks(this.taskListId)))
-      .subscribe((data: Task[]) => this.loadTasksSubscribtion(data));
+      .pipe(catchError(err => {
+          this.notification.showError('Error on deleting task was occured.');
+          return of();
+        }),
+        switchMap(_ => this.loadTasks(this.taskListId)))
+      .subscribe((data: Task[]) => this.loadTasksSubscription(data),
+        (_ => {
+          this.notification.showError('Error on getting tasks was occured.');
+        }));
   }
 
   add() {

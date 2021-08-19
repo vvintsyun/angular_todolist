@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {TaskDataService, TaskListDataService} from './data.service';
-import { LoginService, SecurityService } from './login.service';
+import {TaskDataService, TaskListDataService} from './services/data.service';
+import { LoginService, SecurityService } from './services/login.service';
 
 @Component({
   selector: 'app-root',

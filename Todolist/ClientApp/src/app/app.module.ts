@@ -9,6 +9,8 @@ import {AppRoutingModule} from './app-routing.module';
 import {CommonModule} from '@angular/common';
 import {TaskListComponent} from './task-list/task-list.component';
 import { HomeComponent } from './home/home.component';
+import { MatSnackBarModule } from '@angular/material';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -22,7 +24,9 @@ import { HomeComponent } from './home/home.component';
     HttpClientModule,
     CommonModule,
     FormsModule,
-    AppRoutingModule
+    AppRoutingModule,
+    MatSnackBarModule,
+    BrowserAnimationsModule,
   ],
   bootstrap: [AppComponent]
 })

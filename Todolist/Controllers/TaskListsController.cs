@@ -25,9 +25,9 @@ namespace Todolist.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetTaskLists()
+        public async Task<IActionResult> GetTaskLists()
         {
-            var result = _taskListsService.GetUserTaskLists();
+            var result = await _taskListsService.GetUserTaskLists();
 
             if (result == null)
             {
@@ -38,9 +38,9 @@ namespace Todolist.Controllers
 
         [HttpGet("TaskListByUrl/{url}")]
         [AllowAnonymous]
-        public IActionResult GetTaskListIdByUrl([FromRoute] string url)
+        public async Task<IActionResult> GetTaskListIdByUrl([FromRoute] string url)
         {
-            var taskList = _taskListsService.GetTaskListByUrl(url);
+            var taskList = await _taskListsService.GetTaskListByUrl(url);
 
             if (taskList == null)
             {
@@ -56,14 +56,14 @@ namespace Todolist.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetTaskList([FromRoute] int id)
+        public async Task<IActionResult> GetTaskList([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var taskList = _taskListsService.GetTaskListData(id);
+            var taskList = await _taskListsService.GetTaskListData(id);
 
             if (taskList == null)
             {
@@ -74,7 +74,7 @@ namespace Todolist.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateTaskList([FromRoute] int id, [FromBody] UpdateTaskListDto updateTaskListDto)
+        public async Task<IActionResult> UpdateTaskList([FromRoute] int id, [FromBody] UpdateTaskListDto updateTaskListDto)
         {
             if (!ModelState.IsValid)
             {
@@ -86,7 +86,7 @@ namespace Todolist.Controllers
                 return BadRequest();
             }
             
-            _taskListsService.UpdateTaskList(updateTaskListDto);
+            await _taskListsService.UpdateTaskList(updateTaskListDto);
 
             return Ok();
         }
@@ -104,21 +104,21 @@ namespace Todolist.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteTaskList(int id)
+        public async Task<IActionResult> DeleteTaskList(int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _taskListsService.DeleteTaskList(id);
+            await _taskListsService.DeleteTaskList(id);
             return Ok();
         }
 
         [HttpGet("geturl/{taskListId}")]
-        public IActionResult GetUrl(int taskListId)
+        public async Task<IActionResult> GetUrl(int taskListId)
         {
-            var result = _taskListsService.GetTaskListUrl(taskListId);
+            var result = await _taskListsService.GetTaskListUrl(taskListId);
             
             if (result == null)
             {
@@ -129,18 +129,19 @@ namespace Todolist.Controllers
         }
 
         [HttpGet("downloadzip")]
-        public ActionResult DownloadZip()
+        public async Task<ActionResult> DownloadZip()
         {
-            var taskLists = _taskListsService.GetUserTaskLists();
+            var taskLists = await _taskListsService.GetUserTaskLists();
             if (taskLists == null)
             {
                 return NotFound();
             }
-            List<ZipItem> zipItems = new List<ZipItem>();
-            
+            var zipItems = new List<ZipItem>();
+            var stringBuilder = new StringBuilder();
+
             foreach (var taskListDto in taskLists)
             {
-                var text = GetTaskListContent(taskListDto);
+                var text = GetTaskListContent(taskListDto, stringBuilder);
                 var content = new MemoryStream(Encoding.UTF8.GetBytes(text));
                 var item = new ZipItem($"{taskListDto.Name}.txt", content);
                 zipItems.Add(item);
@@ -150,19 +151,19 @@ namespace Todolist.Controllers
             return File(zipStream, "application/octet-stream", "My todolists.zip");
         }
 
-        private string GetTaskListContent(TaskListDto taskList)
+        private string GetTaskListContent(TaskListDto taskList, StringBuilder stringBuilder)
         {
-            StringBuilder result = new StringBuilder();
+            stringBuilder.Clear();
             var tasks = taskList
                 .Tasks
                 .ToArray();
             
             foreach (var task in tasks)
             {
-                string isCompleted = task.IsCompleted ? "[Completed]" : "[Not Completed]";
-                result.Append($"{task.Description} {isCompleted}" + Environment.NewLine);
+                var isCompleted = task.IsCompleted ? "[Completed]" : "[Not Completed]";
+                stringBuilder.Append($"{task.Description} {isCompleted}" + Environment.NewLine);
             }
-            return result.ToString();
+            return stringBuilder.ToString();
         }
     }
 }
