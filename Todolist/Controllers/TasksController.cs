@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Todolist.Dtos;
@@ -18,9 +19,9 @@ namespace Todolist.Controllers
         }
 
         [HttpGet("byTaskListId/{taskListId}")]
-        public async Task<IActionResult> GetTasks([FromRoute] int taskListId)
+        public async Task<IActionResult> GetTasks([FromRoute] int taskListId, CancellationToken ct)
         {
-            var result = await _tasksService.GetTaskTasksByTaskList(taskListId);
+            var result = await _tasksService.GetTaskTasksByTaskList(taskListId, ct);
 
             if (result == null)
             {
@@ -31,9 +32,9 @@ namespace Todolist.Controllers
         
         [HttpGet("byTaskListUrl/{taskListUrl}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetTasks([FromRoute] string taskListUrl)
+        public async Task<IActionResult> GetTasks([FromRoute] string taskListUrl, CancellationToken ct)
         {
-            var result = await _tasksService.GetTaskListTasksByUrlDto(taskListUrl);
+            var result = await _tasksService.GetTaskListTasksByUrlDto(taskListUrl, ct);
 
             if (result == null)
             {
@@ -43,14 +44,14 @@ namespace Todolist.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetTask([FromRoute] int id)
+        public async Task<IActionResult> GetTask([FromRoute] int id, CancellationToken ct)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var task = await _tasksService.GetTask(id);
+            var task = await _tasksService.GetTask(id, ct);
 
             if (task == null)
             {
@@ -61,7 +62,8 @@ namespace Todolist.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTask([FromRoute] int id, [FromBody] UpdateTaskDto updateTaskDto)
+        public async Task<IActionResult> PutTask([FromRoute] int id, [FromBody] UpdateTaskDto updateTaskDto,
+            CancellationToken ct)
         {
             if (!ModelState.IsValid)
             {
@@ -73,47 +75,48 @@ namespace Todolist.Controllers
                 return BadRequest();
             }
             
-            await _tasksService.UpdateTask(updateTaskDto);
+            await _tasksService.UpdateTask(updateTaskDto, ct);
 
             return Ok();
         }
         
         [HttpPut("updateCompleted")]
         [AllowAnonymous]
-        public async Task<IActionResult> UpdateCompleted([FromBody] UpdateTaskCompletedDto updateTaskCompletedDto)
+        public async Task<IActionResult> UpdateCompleted([FromBody] UpdateTaskCompletedDto updateTaskCompletedDto,
+            CancellationToken ct)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
             
-            await _tasksService.UpdateCompleted(updateTaskCompletedDto);
+            await _tasksService.UpdateCompleted(updateTaskCompletedDto, ct);
 
             return Ok();
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostTask([FromBody] AddTaskDto addTaskDto)
+        public async Task<IActionResult> PostTask([FromBody] AddTaskDto addTaskDto, CancellationToken ct)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            await _tasksService.CreateTask(addTaskDto);
+            await _tasksService.CreateTask(addTaskDto, ct);
 
             return Ok();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTask([FromRoute] int id)
+        public async Task<IActionResult> DeleteTask([FromRoute] int id, CancellationToken ct)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            await _tasksService.DeleteTask(id);
+            await _tasksService.DeleteTask(id, ct);
             return Ok();
         }
     }

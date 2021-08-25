@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -34,7 +35,7 @@ namespace Todolist.Services
             _dbContext = dbContext;
         }
         
-        public async Task<List<TaskDto>> GetTaskTasksByTaskList(int taskListId)
+        public async Task<List<TaskDto>> GetTaskTasksByTaskList(int taskListId, CancellationToken ct)
         {
             var user = _httpContextAccessor.HttpContext.User;
             if (!user.Identity.IsAuthenticated)
@@ -51,7 +52,7 @@ namespace Todolist.Services
                     .Where(x => x.TaskListId == taskListId)
                     .Where(x => x.TaskList.UserId == userId)
                     .ProjectTo<TaskDto>()
-                    .ToListAsync();
+                    .ToListAsync(ct);
             }
             catch(Exception ex)
             {
@@ -62,14 +63,14 @@ namespace Todolist.Services
             return tasks;
         }
         
-        public async Task<List<TaskDto>> GetTaskListTasksByUrlDto(string taskListUrl)
+        public async Task<List<TaskDto>> GetTaskListTasksByUrlDto(string taskListUrl, CancellationToken ct)
         {
-            var taskList = await _taskListsService.GetTaskListByUrl(taskListUrl);
+            var taskList = await _taskListsService.GetTaskListByUrl(taskListUrl, ct);
 
             return taskList?.Tasks;
         }
         
-        public async Task<Task> GetTask(int id, bool allowForAnonymous = false)
+        public async Task<Task> GetTask(int id, CancellationToken ct, bool allowForAnonymous = false)
         {
             Task task;
             if (allowForAnonymous)
@@ -78,7 +79,7 @@ namespace Todolist.Services
                 {
                     task = await _dbContext
                         .Set<Task>()
-                        .FirstOrDefaultAsync(x => x.Id == id);
+                        .FirstOrDefaultAsync(x => x.Id == id, ct);
                 }
                 catch(Exception ex)
                 {
@@ -101,7 +102,7 @@ namespace Todolist.Services
                     task = await _dbContext
                         .Set<Task>()
                         .Where(x => x.TaskList.UserId == userId)
-                        .FirstOrDefaultAsync(x => x.Id == id);
+                        .FirstOrDefaultAsync(x => x.Id == id, ct);
                 }
                 catch(Exception ex)
                 {
@@ -113,9 +114,9 @@ namespace Todolist.Services
             return task;
         }
 
-        public async System.Threading.Tasks.Task CreateTask(AddTaskDto newTask)
+        public async System.Threading.Tasks.Task CreateTask(AddTaskDto newTask, CancellationToken ct)
         {
-            var taskList = await _taskListsService.GetTaskList(newTask.TaskListId);
+            var taskList = await _taskListsService.GetTaskList(newTask.TaskListId, ct);
             if (taskList == null)
             {
                 throw new Exception("Task list doesn't exist.");
@@ -132,7 +133,7 @@ namespace Todolist.Services
             try
             {
                 _dbContext.Add(task);
-                await _dbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync(ct);
             }
             catch(Exception ex)
             {
@@ -141,9 +142,9 @@ namespace Todolist.Services
             }
         }
 
-        public async System.Threading.Tasks.Task UpdateTask(UpdateTaskDto updatedTask)
+        public async System.Threading.Tasks.Task UpdateTask(UpdateTaskDto updatedTask, CancellationToken ct)
         {
-            var task = await GetTask(updatedTask.Id);
+            var task = await GetTask(updatedTask.Id, ct);
             _mapper.Map(updatedTask, task);
             
             try
@@ -158,9 +159,9 @@ namespace Todolist.Services
             }
         }
         
-        public async System.Threading.Tasks.Task DeleteTask(int id)
+        public async System.Threading.Tasks.Task DeleteTask(int id, CancellationToken ct)
         {
-            var task = await GetTask(id);
+            var task = await GetTask(id, ct);
 
             if (task == null)
             {
@@ -170,7 +171,7 @@ namespace Todolist.Services
             try
             {
                 _dbContext.Remove(task);
-                await _dbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync(ct);
             }
             catch(Exception ex)
             {
@@ -179,9 +180,9 @@ namespace Todolist.Services
             }
         }
 
-        public async System.Threading.Tasks.Task UpdateCompleted(UpdateTaskCompletedDto updatedCompleted)
+        public async System.Threading.Tasks.Task UpdateCompleted(UpdateTaskCompletedDto updatedCompleted, CancellationToken ct)
         {
-            var task = await GetTask(updatedCompleted.Id, true);
+            var task = await GetTask(updatedCompleted.Id, ct, true);
             task.IsCompleted = updatedCompleted.IsCompleted;
             
             try
